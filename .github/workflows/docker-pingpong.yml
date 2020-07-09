@@ -4,7 +4,7 @@ on:
   push:
     branches: [master]
     paths:
-      - "pingpong/"
+      - "pingpong/*"
 
 jobs:
   build:
@@ -19,5 +19,5 @@ jobs:
           password: ${{ secrets.REGISTRY_PASSWORD }}
           repository: movd/devopswithkubernetes-pingpong
           path: ./pingpong
-          tags: dev
+          tags: latest
           tag_with_sha: true

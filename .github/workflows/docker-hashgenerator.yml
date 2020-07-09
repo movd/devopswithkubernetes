@@ -19,5 +19,5 @@ jobs:
           password: ${{ secrets.REGISTRY_PASSWORD }}
           repository: movd/devopswithkubernetes-hashgenerator
           path: ./hashgenerator
-          tags: dev
+          tags: latest
           tag_with_sha: true
