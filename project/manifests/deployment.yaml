@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: todo-app-project-movd
+  name: todo-app
 spec:
   selector:
     matchLabels:
-      app: todo-app-project-movd
+      app: todo-app
   template:
     metadata:
       labels:
-        app: todo-app-project-movd
+        app: todo-app
     spec:
       containers:
-        - name: todo-app-project-movd
+        - name: todo-app
           image: movd/devopswithkubernetes-project:v0.4.0
           resources:
             limits:
