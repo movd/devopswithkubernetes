@@ -2,20 +2,22 @@ name: Docker
 
 on:
   push:
-    branches: [ master ]
+    tags:
+      - v*
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: 'Checkout GitHub Action'
+      - name: "Checkout GitHub Action"
         uses: actions/checkout@v2
       - name: Build and push docker
         uses: docker/build-push-action@v1
         with:
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
-          repository: DOCKER_REPOSITORY
+          repository: movd/devopswithkubernetes-project
+          path: ./project
           tags: latest
           tag_with_ref: true
           tag_with_sha: true
