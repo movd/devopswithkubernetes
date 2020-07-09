@@ -1,8 +1,10 @@
-name: Docker dev
+name: "build movd/devopswithkubernetes-project:dev"
 
 on:
   push:
     branches: [master]
+    paths:
+      - "project/"
 
 jobs:
   build:
