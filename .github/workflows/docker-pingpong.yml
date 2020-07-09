@@ -1,10 +1,10 @@
-name: "build movd/devopswithkubernetes-hashgenerator:latest"
+name: "build movd/devopswithkubernetes-pingpong:latest"
 
 on:
   push:
     branches: [master]
     paths:
-      - "hashgenerator/"
+      - "pingpong/"
 
 jobs:
   build:
@@ -17,7 +17,7 @@ jobs:
         with:
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
-          repository: movd/devopswithkubernetes-hashgenerator
-          path: ./hashgenerator
+          repository: movd/devopswithkubernetes-pingpong
+          path: ./pingpong
           tags: dev
           tag_with_sha: true
