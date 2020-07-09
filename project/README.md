@@ -6,7 +6,8 @@ A todo CRUD application written in TypeScript.
 
 I'm adding a tag for each exercise.
 
-- Exercise 1.02: Project v0.1
+- Exercise 1.02: Project [v0.1.0](https://github.com/movd/devopswithkubernetes/tree/v0.1.0/project)
+- Exercise 1.04: Project [v0.2.0](https://github.com/movd/devopswithkubernetes/tree/v0.2.0/project)
 
 ## Container Image
 

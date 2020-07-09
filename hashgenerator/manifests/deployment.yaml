@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hashgenerator-movd
+spec:
+  selector:
+    matchLabels:
+      app: hashgenerator-movd
+  template:
+    metadata:
+      labels:
+        app: hashgenerator-movd
+    spec:
+      containers:
+        - name: hashgenerator-movd
+          image: movd/devopswithkubernetes-hashgenerator:latest
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
