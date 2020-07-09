@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
         - name: todo-app-project-movd
-          image: movd/devopswithkubernetes-project:v0.2.0
+          image: movd/devopswithkubernetes-project:v0.4.0
           resources:
             limits:
               memory: '128Mi'
