@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hashgenerator-movd
+  name: hashgenerator
 spec:
   selector:
     matchLabels:
-      app: hashgenerator-movd
+      app: hashgenerator
   template:
     metadata:
       labels:
-        app: hashgenerator-movd
+        app: hashgenerator
     spec:
       containers:
-        - name: hashgenerator-movd
+        - name: hashgenerator
           image: movd/devopswithkubernetes-hashgenerator:latest
           resources:
             limits:
