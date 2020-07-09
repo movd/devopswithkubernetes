@@ -4,6 +4,11 @@ app.use(express.json());
 
 const PORT = 3000;
 
+app.get('/', (_req, res) => {
+  console.log('someone pinged me');
+  res.json({ message: 'pong' });
+});
+
 app.get('/api/todos', (_req, res) => {
   console.log('someone wants to read the todos');
   res.json({
