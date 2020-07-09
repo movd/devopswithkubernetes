@@ -7,7 +7,7 @@ app.set("trust proxy", true);
 
 let counter = 0;
 
-app.get("/ping", function (req, res) {
+app.get("/pingpong", function (req, res) {
   counter++;
   console.log(`${req.ip} has pinged. i have been ping ${counter} times.`);
 
