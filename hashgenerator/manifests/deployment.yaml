@@ -1,8 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hashgenerator
+  name: hashgenerator-dep
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: hashgenerator
@@ -11,10 +12,30 @@ spec:
       labels:
         app: hashgenerator
     spec:
+      volumes:
+        - name: shared-hashfile
       containers:
-        - name: hashgenerator
-          image: movd/devopswithkubernetes-hashgenerator:latest
+        - name: hashgenerator-server
+          image: movd/devopswithkubernetes-hashgenerator-server:latest
+          env:
+            - name: HASHFILE_PATH
+              value: "/home/node/hash.txt"
           resources:
             limits:
               memory: "512Mi"
               cpu: "500m"
+          volumeMounts:
+            - name: shared-hashfile
+              mountPath: /home/node/
+        - name: hashgenerator
+          image: movd/devopswithkubernetes-hashgenerator:latest
+          env:
+            - name: HASHFILE_PATH
+              value: "/home/node/hash.txt"
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          volumeMounts: # Mount volume
+            - name: shared-hashfile
+              mountPath: /home/node/

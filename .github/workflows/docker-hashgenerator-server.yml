@@ -4,7 +4,7 @@ on:
   push:
     branches: [master]
     paths:
-      - "hashgenerator/"
+      - "hashgenerator/*"
 
 jobs:
   build:
@@ -19,6 +19,6 @@ jobs:
           password: ${{ secrets.REGISTRY_PASSWORD }}
           repository: movd/devopswithkubernetes-hashgenerator-server
           path: ./hashgenerator
-          dockerfile: "Dockerfile.server"
+          dockerfile: ./hashgenerator/Dockerfile.server
           tags: latest
           tag_with_sha: true
