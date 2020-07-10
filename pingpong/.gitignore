@@ -42,4 +42,4 @@ dist/**/*
 yarn.lock
 
 # notes
-scratchpad/
+*.txt

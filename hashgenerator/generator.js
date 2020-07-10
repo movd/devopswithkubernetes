@@ -16,14 +16,10 @@ const writeHashFile = async (path) => {
   }
 };
 
-let i = 0;
 const hashLoop = () => {
   setTimeout(async () => {
     const generatedHashTimestamp = await writeHashFile(HASHFILE_PATH);
-    if (i < 100) {
-      hashLoop();
-    }
-    i++;
+    hashLoop();
   }, 5000);
 };
 
