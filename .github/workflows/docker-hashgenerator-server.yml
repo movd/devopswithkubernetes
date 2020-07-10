@@ -1,4 +1,4 @@
-name: "build devopswithkubernetes-hashgenerator"
+name: "build devopswithkubernetes-hashgenerator-server"
 
 on:
   push:
@@ -17,8 +17,8 @@ jobs:
         with:
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
-          repository: movd/devopswithkubernetes-hashgenerator
+          repository: movd/devopswithkubernetes-hashgenerator-server
           path: ./hashgenerator
-          dockerfile: "Dockerfile.generator"
+          dockerfile: "Dockerfile.server"
           tags: latest
           tag_with_sha: true
