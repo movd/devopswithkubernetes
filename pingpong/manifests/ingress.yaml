@@ -6,7 +6,7 @@ spec:
   rules:
     - http:
         paths:
-          - path: /
+          - path: /pingpong
             backend:
               serviceName: pingpong-svc
               servicePort: 6789

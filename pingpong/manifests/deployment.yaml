@@ -11,9 +11,19 @@ spec:
       labels:
         app: pingpong
     spec:
+      volumes:
+        - name: shared-hash-pingpongs
+          persistentVolumeClaim:
+            claimName: hashfile-claim
       containers:
         - name: pingpong
-          image: movd/devopswithkubernetes-pingpong:latest
+          image: movd/devopswithkubernetes-pingpong:sha-1fdd9cd
+          volumeMounts:
+            - name: shared-hash-pingpongs
+              mountPath: /srv/
+          env:
+            - name: PINGPONGFILE_PATH
+              value: "/srv/pingpong.txt"
           resources:
             limits:
               memory: "512Mi"

@@ -13,29 +13,40 @@ spec:
         app: hashgenerator
     spec:
       volumes:
-        - name: shared-hashfile
+        - name: shared-hash-pingpongs
+          persistentVolumeClaim:
+            claimName: hashfile-claim
+      initContainers:
+        - name: volume-mount-hack
+          image: alpine
+          command: ["sh", "-c", "chown -R 1000:1000 /srv"] # Ref: <https://serverfault.com/a/907160>
+          volumeMounts:
+            - name: shared-hash-pingpongs
+              mountPath: /srv/
       containers:
         - name: hashgenerator-server
-          image: movd/devopswithkubernetes-hashgenerator-server:latest
+          image: movd/devopswithkubernetes-hashgenerator-server:sha-1fdd9cd
           env:
             - name: HASHFILE_PATH
-              value: "/home/node/hash.txt"
+              value: "/srv/hash.txt"
+            - name: PINGPONGFILE_PATH
+              value: "/srv/pingpong.txt"
           resources:
             limits:
               memory: "512Mi"
               cpu: "500m"
           volumeMounts:
-            - name: shared-hashfile
-              mountPath: /home/node/
+            - name: shared-hash-pingpongs
+              mountPath: /srv/
         - name: hashgenerator
-          image: movd/devopswithkubernetes-hashgenerator:latest
+          image: movd/devopswithkubernetes-hashgenerator:sha-1fdd9cd
           env:
             - name: HASHFILE_PATH
-              value: "/home/node/hash.txt"
+              value: "/srv/hash.txt"
           resources:
             limits:
               memory: "512Mi"
               cpu: "500m"
           volumeMounts: # Mount volume
-            - name: shared-hashfile
-              mountPath: /home/node/
+            - name: shared-hash-pingpongs
+              mountPath: /srv/
