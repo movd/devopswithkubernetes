@@ -1,25 +1,10 @@
-import express from 'express';
-const app = express();
-app.use(express.json());
+import http from 'http';
 
-const PORT = 3000;
+import app from './app';
+import { PORT } from './setup';
 
-app.get('/', (_req, res) => {
-  console.log('someone pinged me');
-  res.json({ message: 'pong' });
-});
+const server = http.createServer(app);
 
-app.get('/api/todos', (_req, res) => {
-  console.log('someone wants to read the todos');
-  res.json({
-    todos: [
-      'add the possibility to create, read, update and delete todos',
-      'some testing',
-      'user auth',
-    ],
-  });
-});
-
-app.listen(PORT, () => {
-  console.log(`Server started in port ${PORT}`);
+server.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}`);
 });

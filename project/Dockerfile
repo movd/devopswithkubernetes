@@ -7,10 +7,10 @@ RUN npm install --quiet && npm run tsc
 
 FROM node:14-alpine
 WORKDIR /app
-RUN chown node:node .
-USER node
-COPY package*.json ./
-RUN npm install --quiet --only=prod
 COPY --from=builder /app/build /app/build
+COPY package*.json ./
+RUN chown -R node:node .
+USER node
+RUN npm install --quiet --only=prod
 EXPOSE 3000
 CMD [ "npm", "run", "start"]

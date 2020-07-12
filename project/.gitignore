@@ -43,3 +43,6 @@ yarn.lock
 
 # notes
 scratchpad/
+
+# downloaded by app
+src/public/image.jpg
