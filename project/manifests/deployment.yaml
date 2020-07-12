@@ -1,20 +1,34 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: todo-app
+  name: project-dep
 spec:
   selector:
     matchLabels:
-      app: todo-app
+      app: project
   template:
     metadata:
       labels:
-        app: todo-app
+        app: project
     spec:
+      volumes:
+        - name: project-volume
+          persistentVolumeClaim:
+            claimName: project-claim
+      initContainers:
+        - name: volume-mount-hack
+          image: alpine
+          command: ["sh", "-c", "chown -R 1000:1000 /app/build/public"] # Ref: <https://serverfault.com/a/907160>
+          volumeMounts:
+            - name: project-volume
+              mountPath: /app/build/public
       containers:
-        - name: todo-app
-          image: movd/devopswithkubernetes-project:v0.4.0
+        - name: project-app
+          image: movd/devopswithkubernetes-project:v0.7.0
           resources:
             limits:
-              memory: '128Mi'
-              cpu: '500m'
+              memory: "512Mi"
+              cpu: "500m"
+          volumeMounts:
+            - name: project-volume
+              mountPath: /app/build/public
