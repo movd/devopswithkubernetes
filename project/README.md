@@ -1,13 +1,6 @@
 # Project for the DevOps with Kubernetes MOOC
 
-A todo CRUD application written in TypeScript.
-
-## Solutions
-
-I'm adding a tag for each exercise.
-
-- Exercise 1.02: Project [v0.1.0](https://github.com/movd/devopswithkubernetes/tree/v0.1.0/project)
-- Exercise 1.04: Project [v0.2.0](https://github.com/movd/devopswithkubernetes/tree/v0.2.0/project)
+This folder contains the CRUD app created for solving exercises 1.02, 1.04, 1.05, 1.06, 1.08, 1.12 and 1.13.
 
 ## Container Image
 
