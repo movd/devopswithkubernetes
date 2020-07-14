@@ -25,12 +25,12 @@ spec:
               mountPath: /srv/
       containers:
         - name: hashgenerator-server
-          image: movd/devopswithkubernetes-hashgenerator-server:sha-1fdd9cd
+          image: movd/devopswithkubernetes-hashgenerator-server:sha-861dd0b
           env:
             - name: HASHFILE_PATH
               value: "/srv/hash.txt"
-            - name: PINGPONGFILE_PATH
-              value: "/srv/pingpong.txt"
+            - name: PINGPONG_URL
+              value: "http://pingpong-svc:6789/pingpong"
           resources:
             limits:
               memory: "512Mi"

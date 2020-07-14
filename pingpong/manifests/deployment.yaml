@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: pingpong
+  name: pingpong-dep
 spec:
   selector:
     matchLabels:
@@ -11,19 +11,9 @@ spec:
       labels:
         app: pingpong
     spec:
-      volumes:
-        - name: shared-hash-pingpongs
-          persistentVolumeClaim:
-            claimName: hashfile-claim
       containers:
         - name: pingpong
-          image: movd/devopswithkubernetes-pingpong:sha-1fdd9cd
-          volumeMounts:
-            - name: shared-hash-pingpongs
-              mountPath: /srv/
-          env:
-            - name: PINGPONGFILE_PATH
-              value: "/srv/pingpong.txt"
+          image: movd/devopswithkubernetes-pingpong:sha-b139e5c
           resources:
             limits:
               memory: "512Mi"
