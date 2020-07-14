@@ -1,6 +1,7 @@
 FROM node:14-alpine
 
 WORKDIR /app
+RUN apk --no-cache add curl
 RUN chown -R -v node:node /app 
 USER node
 COPY package*.json /app/
