@@ -12,7 +12,7 @@ import { downloadImage, ImageExists } from './services/downloadImage';
     try {
       await downloadImage('https://picsum.photos/1200', IMAGE_PATH);
     } catch (error) {
-      console.error(error);
+      console.error('criticial: ', error);
     }
   }
 })();
