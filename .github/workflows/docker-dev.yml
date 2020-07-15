@@ -18,6 +18,6 @@ jobs:
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
           repository: movd/devopswithkubernetes-project-backend
-          path: ./project
+          path: ./project/backend
           tags: dev
           tag_with_sha: true
