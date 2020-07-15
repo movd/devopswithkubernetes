@@ -45,7 +45,7 @@ const App: React.FC<{}> = () => {
         </p>
       ) : (
         <>
-          <Image url="http://localhost:3001/image.jpg" />
+          <Image url="http://localhost:8081/api/static/image.jpg" />
           <TodosList todos={todos} />
           <NewTodoForm
             newTask={newTask}

@@ -7,6 +7,11 @@ spec:
   selector:
     app: project
   ports:
-    - port: 2345
+    - name: backend
+      port: 2345
       protocol: TCP
       targetPort: 3000
+    - name: frontend
+      protocol: TCP
+      port: 1234
+      targetPort: 80

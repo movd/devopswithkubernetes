@@ -23,8 +23,8 @@ spec:
             - name: project-volume
               mountPath: /app/build/public
       containers:
-        - name: project-app
-          image: movd/devopswithkubernetes-project:v0.7.0
+        - name: project-backend
+          image: movd/devopswithkubernetes-project-backend:v1.0.4
           resources:
             limits:
               memory: "512Mi"
@@ -32,3 +32,9 @@ spec:
           volumeMounts:
             - name: project-volume
               mountPath: /app/build/public
+        - name: project-frontend
+          image: movd/devopswithkubernetes-project-frontend:v1.0.4
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "500m"

@@ -6,7 +6,19 @@ const router = Router();
 
 const todos = [
   {
-    task: 'add the possibility to create, read, update and delete todos',
+    task: 'add create',
+    done: true,
+  },
+  {
+    task: 'add read',
+    done: true,
+  },
+  {
+    task: 'add update',
+    done: false,
+  },
+  {
+    task: 'add delete',
     done: false,
   },
   { task: 'some testing', done: false },

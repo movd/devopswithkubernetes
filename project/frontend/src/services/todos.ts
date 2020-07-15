@@ -1,7 +1,7 @@
 import axios from "axios";
 
 import { Todo } from "../types";
-const baseUrl = "http://localhost:8081/todos";
+const baseUrl = "http://localhost:8081/api/todos";
 
 const fetchAll = async () => {
   const res = await axios.get(baseUrl);
