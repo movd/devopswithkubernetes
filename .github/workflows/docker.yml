@@ -1,11 +1,11 @@
-name: "build movd/devopswithkubernetes-project:latest"
+name: "build project-backend:latest"
 
 on:
   push:
     tags:
       - v*
     paths:
-      - "project/*"
+      - "project/backend/*"
 
 jobs:
   build:
@@ -18,7 +18,7 @@ jobs:
         with:
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
-          repository: movd/devopswithkubernetes-project
+          repository: movd/devopswithkubernetes-project-backend
           path: ./project
           tags: latest
           tag_with_ref: true
