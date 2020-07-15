@@ -24,8 +24,21 @@ export const parseString = (keyToParse: string, stringToParse: any): string => {
   return stringToParse;
 };
 
+const isBoolean = (val: any) => Boolean(val) === val;
+
+export const parseBoolean = (keyToParse: string, valToParse: any): boolean => {
+  console.log(isBoolean(valToParse));
+  if (!isBoolean(valToParse)) {
+    throw new Error(`Incorrect or missing '${keyToParse}' must be a boolean`);
+  }
+
+  return valToParse as boolean;
+};
+
 export const toNewTodo = (object: any): Todo => {
   return {
-    todo: parseString('todo', object.todo),
+    task: parseString('task', object.task),
+    // If 'done' is given run trough typeguard check otherwise set false
+    done: object.done ? parseBoolean('done', object.done) : false,
   };
 };
