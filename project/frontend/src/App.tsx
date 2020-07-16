@@ -7,6 +7,10 @@ import NewTodoForm from "./components/NewTodoForm";
 import todosService from "./services/todos";
 import { Todo } from "./types";
 
+let baseUrl = "http://localhost:8081/api";
+if (process.env.NODE_ENV === "development") {
+  baseUrl = "http://localhost:3000/api";
+}
 const App: React.FC<{}> = () => {
   const [isFetching, setIsFetching] = useState(true);
   const [todos, setTodos] = useState<Todo[]>([]);
@@ -26,13 +30,41 @@ const App: React.FC<{}> = () => {
   ): Promise<void> => {
     e.preventDefault();
     try {
-      const addedTask: Todo = await todosService.create({
+      const addedTask: Todo = await todosService.createTask({
         task: newTask,
-        done: false,
       });
       setTodos([...todos, addedTask]);
     } catch (error) {
       console.error("adding task failed");
+    }
+  };
+
+  const handleTaskUpdate = async (id: number): Promise<void> => {
+    const taskToUpdate = todos.find((t) => t.id === id);
+    if (taskToUpdate) {
+      try {
+        const updatedTask = await todosService.updateTask({
+          task: taskToUpdate.task,
+          id: taskToUpdate.id,
+          done: !taskToUpdate.done,
+        });
+        const idx = todos.findIndex((t) => t.id === updatedTask.id);
+        const updatedTodos = [...todos];
+        updatedTodos[idx] = updatedTask;
+        setTodos(updatedTodos);
+      } catch (error) {
+        console.error("could not update task");
+      }
+    }
+  };
+
+  const handleTaskDelete = async (id: number): Promise<void> => {
+    try {
+      await todosService.deleteTask(id);
+      const newTodos = todos.filter((t) => t.id !== id);
+      setTodos([...newTodos]);
+    } catch (error) {
+      console.error("deleting task failed");
     }
   };
 
@@ -45,8 +77,12 @@ const App: React.FC<{}> = () => {
         </p>
       ) : (
         <>
-          <Image url="http://localhost:8081/api/static/image.jpg" />
-          <TodosList todos={todos} />
+          <Image url={`${baseUrl}/static/image.jpg`} />
+          <TodosList
+            handleTaskUpdate={handleTaskUpdate}
+            todos={todos}
+            handleTaskDelete={handleTaskDelete}
+          />
           <NewTodoForm
             newTask={newTask}
             handleNewTodo={handleNewTodo}

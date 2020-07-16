@@ -27,7 +27,6 @@ export const parseString = (keyToParse: string, stringToParse: any): string => {
 const isBoolean = (val: any) => Boolean(val) === val;
 
 export const parseBoolean = (keyToParse: string, valToParse: any): boolean => {
-  console.log(isBoolean(valToParse));
   if (!isBoolean(valToParse)) {
     throw new Error(`Incorrect or missing '${keyToParse}' must be a boolean`);
   }
@@ -35,10 +34,40 @@ export const parseBoolean = (keyToParse: string, valToParse: any): boolean => {
   return valToParse as boolean;
 };
 
+const isNumber = (num: any): num is number => {
+  return typeof num == 'number' || num instanceof Number || !isNaN(num);
+};
+
+export const parseNumber = (keyToParse: string, numToParse: any): number => {
+  if (!numToParse || !isNumber(numToParse)) {
+    throw new Error(
+      `Incorrect or missing ${keyToParse} must be a number: ${
+        numToParse as number
+      }`
+    );
+  }
+
+  // only allow integers
+  if (!Number.isInteger(Number(numToParse)) || !(Number(numToParse) > 0)) {
+    throw new Error(
+      `Incorrect or missing ${keyToParse} must be positive integer: ${numToParse}`
+    );
+  }
+  return Number(numToParse);
+};
+
 export const toNewTodo = (object: any): Todo => {
   return {
     task: parseString('task', object.task),
     // If 'done' is given run trough typeguard check otherwise set false
     done: object.done ? parseBoolean('done', object.done) : false,
+    id: parseNumber('id', object.id),
+  };
+};
+
+export const toSingleTask = (object: any): Omit<Todo, 'task' | 'done'> => {
+  const id = parseNumber('id', object.id);
+  return {
+    id,
   };
 };
