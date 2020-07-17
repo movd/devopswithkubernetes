@@ -2,6 +2,7 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: hashgenerator-ingress
+  namespace: hashgenerator
 spec:
   rules:
     - http:
@@ -9,4 +10,4 @@ spec:
           - path: /
             backend:
               serviceName: hashgenerator-svc
-              servicePort: 1234
+              servicePort: 3001
