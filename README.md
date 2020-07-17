@@ -81,3 +81,21 @@ deployment.apps/hashgenerator-dep   1/1     1            1           2m31s
 NAME                                           DESIRED   CURRENT   READY   AGE
 replicaset.apps/hashgenerator-dep-66c9cc599d   1         1         1       2m31s
 ```
+
+### Exercise 2.05 ConfigMaps for `hashgenerator-server` aka main application
+
+```sh
+$ kubectl config set-context --current --namespace=hashgenerator
+# Create ConfigMap from `hashgenerator-env-file.properties`
+$ cat hashgenerator/manifests/hashgenerator-env-file.properties
+SERVER_PORT=3001
+GENERATOR_PORT=3002
+HASHGENERATOR_URL=http://hashgenerator-svc:2345/
+PINGPONG_URL=http://pingpong-svc.pingpong:6789/pingpong
+MESSAGE=Hello%   
+$ kubectl create configmap hashgenerator-config-env-file --from-env-file hashgenerator/manifests/hashgenerator-env-file.properties
+configmap/hashgenerator-config-env-file created
+# It's live
+$ curl -s http://localhost:8081
+Hello<br> 2020-07-17T17:25:59.300Z: 14c4d2ff-25f2-4b45-86b8-4b7e3b80b435<br> 13
+```

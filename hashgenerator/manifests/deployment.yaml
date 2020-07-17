@@ -15,16 +15,28 @@ spec:
     spec:
       containers:
         - name: hashgenerator-server
-          image: movd/devopswithkubernetes-hashgenerator-server:sha-3479d69
+          image: movd/devopswithkubernetes-hashgenerator-server:sha-7221ef8
           env:
             - name: SERVER_PORT
-              value: "3001"
+              valueFrom:
+                configMapKeyRef:
+                  name: hashgenerator-config-env-file
+                  key: SERVER_PORT
             - name: HASHGENERATOR_URL
-              # 2345 is mapped to port 3002 of generator
-              value: "http://hashgenerator-svc:2345/"
+              valueFrom:
+                configMapKeyRef:
+                  name: hashgenerator-config-env-file
+                  key: HASHGENERATOR_URL
             - name: PINGPONG_URL
-              # ping pong lives in another namespace
-              value: "http://pingpong-svc.pingpong:6789/pingpong"
+              valueFrom:
+                configMapKeyRef:
+                  name: hashgenerator-config-env-file
+                  key: PINGPONG_URL
+            - name: MESSAGE
+              valueFrom:
+                configMapKeyRef:
+                  name: hashgenerator-config-env-file
+                  key: MESSAGE
           resources:
             limits:
               memory: "512Mi"
@@ -33,7 +45,10 @@ spec:
           image: movd/devopswithkubernetes-hashgenerator:sha-3479d69
           env:
             - name: GENERATOR_PORT
-              value: "3002"
+              valueFrom:
+                configMapKeyRef:
+                  name: hashgenerator-config-env-file
+                  key: GENERATOR_PORT
           resources:
             limits:
               memory: "512Mi"
