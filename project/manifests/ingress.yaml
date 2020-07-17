@@ -1,7 +1,25 @@
+# serving the project from /project
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: project-ingress
+  name: project-ingress-frontend
+  namespace: project
+  annotations:
+    traefik.ingress.kubernetes.io/rewrite-target: /project
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /project
+            backend:
+              serviceName: project-svc
+              servicePort: 1234
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: project-ingress-api-static
+  namespace: project
 spec:
   rules:
     - http:
@@ -10,7 +28,7 @@ spec:
             backend:
               serviceName: project-svc
               servicePort: 2345
-          - path: /
+          - path: /static
             backend:
               serviceName: project-svc
               servicePort: 1234
