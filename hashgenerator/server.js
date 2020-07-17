@@ -17,6 +17,7 @@ console.log("PINGPONG_URL:", PINGPONG_URL);
 console.log("PINGPONGFILE_PATH:", PINGPONGFILE_PATH);
 
 const PORT = process.env.SERVER_PORT || 3000;
+const MESSAGE = process.env.MESSAGE || "Not from dotenv";
 
 app.set("trust proxy", true);
 
@@ -58,7 +59,9 @@ app.get("/", async (req, res) => {
       };
 
       const pingPongCounter = await fetchPingPongs(PINGPONG_URL);
-      return res.status(200).send(`${currentHash}<br> ${pingPongCounter}`);
+      return res
+        .status(200)
+        .send(`${MESSAGE}<br> ${currentHash}<br> ${pingPongCounter}`);
     }
 
     if (PINGPONGFILE_PATH) {
@@ -66,7 +69,9 @@ app.get("/", async (req, res) => {
         PINGPONGFILE_PATH,
         "utf-8"
       );
-      return res.status(200).send(`${currentHash}<br> ${pingPongFile}`);
+      return res
+        .status(200)
+        .send(`${MESSAGE}<br> ${currentHash}<br> ${pingPongFile}`);
     }
 
     // If nothing
