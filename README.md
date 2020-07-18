@@ -40,12 +40,12 @@ $ curl -s http://localhost:8081/pingpong
 # Create main app in namespace that fetches ping/pongs and prints uuid every 5secs
 $ kubectl create namespace hashgenerator
 namespace/hashgenerator created
-$ kubectl apply -f hashgenerator/manifests/ 
+$ kubectl apply -f hashgenerator/manifests/
 deployment.apps/hashgenerator-dep created
 ingress.extensions/hashgenerator-ingress created
 service/hashgenerator-svc created
 # test
-$ curl -s http://localhost:8081/pingpong 
+$ curl -s http://localhost:8081/pingpong
 {"counter":2}
 $ curl -s http://localhost:8081/
 2020-07-17T11:44:52.631Z: 4bdeb719-73cb-482f-b66c-40d04d0d880d<br> 2
@@ -68,7 +68,7 @@ replicaset.apps/pingpong-dep-777dbbd675   1         1         1       3m49s
 $ kubens hashgenerator
 Context "k3s-default" modified.
 Active namespace is "hashgenerator".
-$ kubectl get all     
+$ kubectl get all
 NAME                                     READY   STATUS    RESTARTS   AGE
 pod/hashgenerator-dep-66c9cc599d-wgkzg   2/2     Running   0          2m31s
 
@@ -92,10 +92,38 @@ SERVER_PORT=3001
 GENERATOR_PORT=3002
 HASHGENERATOR_URL=http://hashgenerator-svc:2345/
 PINGPONG_URL=http://pingpong-svc.pingpong:6789/pingpong
-MESSAGE=Hello%   
+MESSAGE=Hello%
 $ kubectl create configmap hashgenerator-config-env-file --from-env-file hashgenerator/manifests/hashgenerator-env-file.properties
 configmap/hashgenerator-config-env-file created
 # It's live
 $ curl -s http://localhost:8081
 Hello<br> 2020-07-17T17:25:59.300Z: 14c4d2ff-25f2-4b45-86b8-4b7e3b80b435<br> 13
+```
+
+### Exercise 2.06
+
+This spins up two pods. One Deployment with the ping/pong app and one StatefulSet with a PostgreSQL database container. During the creation of the database pod, the very very complex schema gets seeded. The database password is stored as as SealedSecret.
+
+```sh
+$ kubectl apply -f pingpong/manifests/
+deployment.apps/pingpong-dep created
+ingress.extensions/pingpong-ingress created
+sealedsecret.bitnami.com/postgres-pw created
+service/pingpong-svc created
+service/postgres-pingpong-svc created
+configmap/postgres-pingpong-seed created
+statefulset.apps/postgres-pingpong-stateful created
+$ curl -s http://localhost:8081/pingpong
+{"counter":4}%
+$ kubectl logs -f pingpong-dep-6bcb74f875-w5r72 pingpong
+
+> pingpong@1.0.0 start /app
+> node server.js
+
+Writing to txt is disabled
+NEVER log a db password to stdin: 'passw0rd'
+Server started on: 3000
+added a new ping to db
+added a new ping to db
+added a new ping to db
 ```

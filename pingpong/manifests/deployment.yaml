@@ -14,7 +14,28 @@ spec:
     spec:
       containers:
         - name: pingpong
-          image: movd/devopswithkubernetes-pingpong:sha-b139e5c
+          image: movd/devopswithkubernetes-pingpong:sha-14f5389
+          env:
+            # These two ideally would go into a ConfigMap
+            - name: ENABLE_DB
+              value: "true"
+            - name: POSTGRES_HOST
+              value: "postgres-pingpong-svc"
+          envFrom:
+            - secretRef:
+                name: postgres-pw
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+        - name: psql-client
+          # Just random alpine Image I found that has the psql-client installed
+          # Keep it idling to debug the db connection
+          image: jbergknoff/postgresql-client
+          command: ["tail", "-f", "/dev/null"]
+          envFrom:
+            - secretRef:
+                name: postgres-pw
           resources:
             limits:
               memory: "512Mi"
