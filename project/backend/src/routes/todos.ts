@@ -1,6 +1,6 @@
 import { Request, Response, Router } from 'express';
 
-import { toNewTodo, toSingleTask } from '../typeguards';
+import { toNewTask, toSingleTask } from '../typeguards';
 
 const router = Router();
 
@@ -39,7 +39,7 @@ router.get('/', (_req, res: Response) => {
 
 router.post('/', (req: Request, res: Response) => {
   try {
-    const newTodo = toNewTodo({
+    const newTodo = toNewTask({
       ...req.body,
       id: Math.floor(Math.random() * 1000),
     });
@@ -120,7 +120,7 @@ router.put('/:id', (req: Request, res: Response) => {
     }
 
     // Overwrite in payload with param and typecheck
-    const taskToUpdate = toNewTodo({ ...req.body, id: requestedTask.id });
+    const taskToUpdate = toNewTask({ ...req.body, id: requestedTask.id });
     const idx = todos.findIndex((t) => t.id === taskToUpdate.id);
     todos[idx] = taskToUpdate;
 

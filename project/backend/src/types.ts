@@ -1,9 +1,9 @@
-export interface Todo {
+export interface Task {
   task: string;
   done: boolean;
   id: number;
 }
 
 export interface TodoListAttributes {
-  todos: Array<Todo>;
+  todos: Array<Task>;
 }
