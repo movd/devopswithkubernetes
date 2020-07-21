@@ -23,7 +23,7 @@ spec:
               value: "postgres-pingpong-svc"
           envFrom:
             - secretRef:
-                name: postgres-pw
+                name: postgres-pw-url
           resources:
             limits:
               memory: "512Mi"

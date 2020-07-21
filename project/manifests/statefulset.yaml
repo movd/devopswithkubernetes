@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-project-svc
+  namespace: project
+spec:
+  type: ClusterIP
+  selector:
+    # Note to self: select via label!
+    app: postgres-project
+  ports:
+    - name: db
+      port: 5432
+      protocol: TCP
+      targetPort: 5432
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-project-stateful
+  namespace: project
+spec:
+  serviceName: postgres-project
+  selector:
+    matchLabels:
+      app: postgres-project
+  template:
+    metadata:
+      labels:
+        app: postgres-project
+    spec:
+      containers:
+        - name: db
+          image: postgres:10-alpine
+          env:
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          envFrom:
+            - secretRef:
+                name: postgres-pw-url
+          ports:
+            - name: db
+              containerPort: 5432
+          volumeMounts:
+            # mountpoint to store pg data
+            - name: postgres-project-data
+              mountPath: /var/lib/postgresql/data/pgdata
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-project-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: local-path
+        resources:
+          requests:
+            storage: 1Gi

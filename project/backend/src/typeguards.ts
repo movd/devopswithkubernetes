@@ -4,7 +4,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Stream } from 'stream';
-import { Task } from './types';
+import { NewTask } from './types';
 
 export const parseDownloadedImage = (fileToParse: any): Stream => {
   if (!fileToParse || !fileToParse.rawHeaders.includes('image/jpeg')) {
@@ -56,18 +56,10 @@ export const parseNumber = (keyToParse: string, numToParse: any): number => {
   return Number(numToParse);
 };
 
-export const toNewTask = (object: any): Task => {
+export const toNewTask = (object: any): NewTask => {
   return {
     task: parseString('task', object.task),
     // If 'done' is given run trough typeguard check otherwise set false
     done: object.done ? parseBoolean('done', object.done) : false,
-    id: parseNumber('id', object.id),
-  };
-};
-
-export const toSingleTask = (object: any): Omit<Task, 'task' | 'done'> => {
-  const id = parseNumber('id', object.id);
-  return {
-    id,
   };
 };
