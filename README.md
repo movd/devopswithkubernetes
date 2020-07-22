@@ -24,6 +24,8 @@ Against [better judgement](https://vsupalov.com/docker-latest-tag/) I used the "
 
 ## Solutions for Part 2
 
+_The solution for exercises are based on each other. For this reason, not all of them are documented here._
+
 ### Deploying Solution for Ex. 2.03
 
 ```sh
@@ -127,3 +129,52 @@ added a new ping to db
 added a new ping to db
 added a new ping to db
 ```
+
+### Exercise 2.07
+
+The state of the todo application gets stored in a PostgreSQL database. The app hooked up via [Sequelize](https://github.com/sequelize/sequelize). The table get created based on the [Task model](https://github.com/movd/devopswithkubernetes/blob/2229fc1779d08d97d4168b44536a96c599a6882c/project/backend/src/models/task.ts). For deployment the db connection parameter and password are stored and read from `secret.yaml`. This time around I'm not using SealedSecret. Only the backend and the deployment setup where changed.
+
+<table>
+<tr>
+<td width="60%">
+<pre lang="sh">
+$ kubectl apply -f project/manifests/
+deployment.apps/project-dep created
+ingress.extensions/project-ingress-frontend created
+ingress.extensions/project-ingress-api-static created
+persistentvolume/project-pv created
+persistentvolumeclaim/project-claim created
+secret/postgres-pw-url created
+service/project-svc created
+service/postgres-project-svc created
+statefulset.apps/postgres-project-stateful created
+</pre>
+</td>
+<td width="30%">
+<code>http://localhost:8081/project</code><br><img src="frontend-screenshot.png" alt="Screenshot of frontend">
+</td>
+</tr> 
+</table>
+
+### Exercise 2.08
+
+I followed the [steps in the course notes](https://devopswithkubernetes.com/part2/#monitoring) and installed Grafana and Loki via Helm. I added request logging via [morgan](https://github.com/expressjs/morgan) to my project application.
+
+```sh
+$ kubectl apply -f project/manifests/
+deployment.apps/project-dep created
+ingress.extensions/project-ingress-frontend created
+ingress.extensions/project-ingress-api-static created
+# ...just like in the exercise before
+```
+
+Grafana dashboard:
+
+```sh
+$ kubectl port-forward prometheus-operator-1595404775-grafana-7964b4fb7d-4hflq 3000
+Forwarding from 127.0.0.1:3000 -> 3000
+Forwarding from [::1]:3000 -> 3000
+Handling connection for 3000
+```
+
+![Screenshot of Grafana with Loki](grafana-loki-screenshot.png)
