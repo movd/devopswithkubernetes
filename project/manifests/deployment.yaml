@@ -25,7 +25,7 @@ spec:
               mountPath: /app/build/public
       containers:
         - name: project-backend
-          image: movd/devopswithkubernetes-project-backend:v1.2.0
+          image: movd/devopswithkubernetes-project-backend:v1.3.0
           envFrom:
             - secretRef:
                 name: postgres-pw-url
@@ -42,15 +42,3 @@ spec:
             limits:
               memory: "512Mi"
               cpu: "500m"
-        # - name: psql-client
-        #   # Just random alpine Image I found that has the psql-client installed
-        #   # Keep it idling to debug the db connection
-        #   image: jbergknoff/postgresql-client
-        #   command: ["tail", "-f", "/dev/null"]
-        #   envFrom:
-        #     - secretRef:
-        #         name: postgres-pw-url
-        #   resources:
-        #     limits:
-        #       memory: "512Mi"
-        #       cpu: "500m"

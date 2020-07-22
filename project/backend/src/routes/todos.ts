@@ -23,7 +23,17 @@ router.post('/', async (req: Request, res: Response) => {
     return res.status(201).json({ newTodo: addedTask });
   } catch (error) {
     if (error instanceof Error) {
-      console.error(error.message);
+      if (
+        error.name === 'SequelizeDatabaseError' &&
+        error.message.includes('value too long for type character')
+      ) {
+        console.error(
+          `todos ERROR: ${error.message} - '${toNewTask(req.body).task}'`
+        );
+      } else {
+        console.error(`todos ERROR: ${error.message}`);
+      }
+
       return res.status(400).json({ error: error.message });
     } else {
       console.error(`something went really wrong: ${error as string}`);
@@ -38,7 +48,7 @@ router.get('/:id', async (req: Request, res: Response) => {
     return res.status(200).json(await Task.findByPk(id));
   } catch (error) {
     if (error instanceof Error) {
-      console.error(error.message);
+      console.error(`todos ERROR: ${error.message}`);
       return res.status(400).json({ error: error.message });
     } else {
       console.error(`something went really wrong: ${error as string}`);
@@ -54,7 +64,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
     return res.status(204).json({});
   } catch (error) {
     if (error instanceof Error) {
-      console.error(error.message);
+      console.error(`todos ERROR: ${error.message}`);
       return res.status(400).json({ error: error.message });
     } else {
       console.error(`something went really wrong: ${error as string}`);
@@ -69,7 +79,6 @@ router.put('/:id', async (req: Request, res: Response) => {
     // only proceed if task if found by id
     if (await Task.findByPk(id)) {
       const taskToUpdate = toNewTask(req.body);
-      console.log(req.body);
       await Task.update(
         { task: taskToUpdate.task, done: taskToUpdate.done },
         { where: { id } }
@@ -81,7 +90,7 @@ router.put('/:id', async (req: Request, res: Response) => {
     }
   } catch (error) {
     if (error instanceof Error) {
-      console.error(error.message);
+      console.error(`todos ERROR: ${error.message}`);
       return res.status(400).json({ error: error.message });
     } else {
       console.error(`something went really wrong: ${error as string}`);

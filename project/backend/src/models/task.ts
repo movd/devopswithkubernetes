@@ -20,7 +20,7 @@ export const taskFactory = (sequelize: Sequelize): TaskModelStatic => {
         type: DataTypes.UUID,
         allowNull: true,
       },
-      task: DataTypes.STRING,
+      task: DataTypes.STRING(140),
       done: DataTypes.BOOLEAN,
     },
     {

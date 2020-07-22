@@ -15,6 +15,7 @@
   "devDependencies": {
     "@types/cors": "^2.8.6",
     "@types/express": "^4.17.7",
+    "@types/morgan": "^1.9.1",
     "@types/node": "^14.0.22",
     "@types/sequelize": "^4.28.9",
     "@typescript-eslint/eslint-plugin": "^3.6.0",
@@ -29,6 +30,7 @@
     "cross-env": "^7.0.2",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "morgan": "^1.10.0",
     "pg": "^8.3.0",
     "pg-hstore": "^2.3.3",
     "sequelize": "^6.3.3"
