@@ -1,0 +1,15 @@
+apiVersion: v1
+data:
+  GENERATOR_PORT: "3002"
+  HASHGENERATOR_URL: http://hashgenerator-svc:2345/
+  MESSAGE: Hello
+  PINGPONG_URL: http://pingpong-svc.pingpong:6789/pingpong
+  SERVER_PORT: "3001"
+kind: ConfigMap
+metadata:
+  creationTimestamp: "2020-07-27T15:56:01Z"
+  name: hashgenerator-config-env-file
+  namespace: hashgenerator
+  resourceVersion: "18001"
+  selfLink: /api/v1/namespaces/hashgenerator/configmaps/hashgenerator-config-env-file
+  uid: da5478a4-d973-41f7-8038-8d52661c7a4f

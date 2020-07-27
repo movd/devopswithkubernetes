@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pingpong-dep
+  namespace: pingpong
+spec:
+  selector:
+    matchLabels:
+      app: pingpong
+  template:
+    metadata:
+      labels:
+        app: pingpong
+    spec:
+      containers:
+        - name: pingpong
+          image: movd/devopswithkubernetes-pingpong:sha-14f5389
+          env:
+            # These two ideally would go into a ConfigMap
+            - name: ENABLE_DB
+              value: "true"
+            - name: POSTGRES_HOST
+              value: "postgres-pingpong-svc"
+          envFrom:
+            - secretRef:
+                name: postgres-pw
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: 50m

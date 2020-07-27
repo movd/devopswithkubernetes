@@ -2,6 +2,17 @@
 
 This repo contains my solutions for the exercises of <https://devopswithkubernetes.com/>.
 
+- [Solving the DevOps with Kubernetes MOOC](#solving-the-devops-with-kubernetes-mooc)
+  - [Solutions for Part 1](#solutions-for-part-1)
+  - [Solutions for Part 2](#solutions-for-part-2)
+    - [Deploying Solution for Ex. 2.03](#deploying-solution-for-ex-203)
+    - [Exercise 2.05](#exercise-205)
+    - [Exercise 2.06](#exercise-206)
+    - [Exercise 2.07](#exercise-207)
+    - [Exercise 2.08](#exercise-208)
+  - [Solutions for Part 3](#solutions-for-part-3)
+    - [Exercise 3.01](#exercise-301)
+
 ## Solutions for Part 1
 
 | exercise | solution in subfolder        |
@@ -84,7 +95,9 @@ NAME                                           DESIRED   CURRENT   READY   AGE
 replicaset.apps/hashgenerator-dep-66c9cc599d   1         1         1       2m31s
 ```
 
-### Exercise 2.05 ConfigMaps for `hashgenerator-server` aka main application
+### Exercise 2.05
+
+ConfigMaps for `hashgenerator-server` aka main application
 
 ```sh
 $ kubectl config set-context --current --namespace=hashgenerator
@@ -178,3 +191,118 @@ Handling connection for 3000
 ```
 
 ![Screenshot of Grafana with Loki](grafana-loki-screenshot.png)
+
+## Solutions for Part 3
+
+### Exercise 3.01
+
+Create cluster in Frankfurt with two nodes and connect to it:
+
+```sh
+$ gcloud container clusters create dwk-cluster --zone=europe-west3 --num-nodes=2
+Creating cluster dwk-cluster in europe-west3... Cluster is being configured...Cluster is being deployed...Cluster is being health-checked...done.
+Created [https://container.googleapis.com/v1/projects/dwk-gke-123456/zones/europe-west3/clusters/dwk-cluster].
+To inspect the contents of your cluster, go to: https://console.cloud.google.com/kubernetes/workload_/gcloud/europe-west3/dwk-cluster?project=dwk-gke-123456
+kubeconfig entry generated for dwk-cluster.
+NAME         LOCATION      MASTER_VERSION  MASTER_IP     MACHINE_TYPE   NODE_VERSION   NUM_NODES  STATUS
+dwk-cluster  europe-west3  1.15.12-gke.2   34.89.245.27  n1-standard-1  1.15.12-gke.2  6          RUNNING
+
+$ gcloud container clusters get-credentials dwk-cluster --region europe-west3 --project dwk-gke-123456
+Fetching cluster endpoint and auth data.
+kubeconfig entry generated for dwk-cluster
+```
+
+Create ping/pong App with it's own public ip adress. So that external users can ping it via:`http://EXTERNAL-IP/pingpong`. The `hashgenerator-server` reaches it internally via `http://pingpong-svc.pingpong:6789/pingpong`
+
+```
+$ kubectl create namespace pingpong
+namespace/pingpong created
+$ kubectl apply -f pingpong/manifests-gke/
+deployment.apps/pingpong-dep created
+secret/postgres-pw created
+service/pingpong-svc-loadbalancer created
+service/pingpong-svc created
+service/postgres-pingpong-svc created
+configmap/postgres-pingpong-seed created
+statefulset.apps/postgres-pingpong-stateful created
+$ kubens pingpong
+Context "gke_dwk-gke-123456_europe-west3_dwk-cluster" modified.
+Active namespace is "pingpong".
+# Wait for external IP...
+$ kubectl get svc --watch
+NAME                        TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+pingpong-svc                ClusterIP      10.51.248.145   <none>        6789/TCP       42s
+pingpong-svc-loadbalancer   LoadBalancer   10.51.246.118   <pending>     80:31106/TCP   42s
+postgres-pingpong-svc       ClusterIP      10.51.255.120   <none>        5432/TCP       42s
+pingpong-svc-loadbalancer   LoadBalancer   10.51.246.118   34.89.233.5   80:31106/TCP   50s
+```
+
+ping to pong:
+
+```sh
+$ curl -s http://34.89.233.5/pingpong
+{"counter":0}%
+$ curl -s http://34.89.233.5/pingpong
+{"counter":1}%
+```
+
+Create the hashgenerator app + server:
+
+```
+$ kubectl create namespace hashgenerator
+namespace/hashgenerator created
+$ kubens hashgenerator
+Context "gke_dwk-gke-123456_europe-west3_dwk-cluster" modified.
+Active namespace is "hashgenerator".
+$ kubectl apply -f hashgenerator/manifests-gke/
+configmap/hashgenerator-config-env-file created
+deployment.apps/hashgenerator-dep created
+service/hashgenerator-svc-loadbalancer created
+service/hashgenerator-svc created
+# Wait for external IP address
+$ kubectl get svc --watch
+NAME                             TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+hashgenerator-svc                ClusterIP      10.51.249.229   <none>        2345/TCP       35s
+hashgenerator-svc-loadbalancer   LoadBalancer   10.51.241.121   <pending>     80:32281/TCP   35s
+hashgenerator-svc-loadbalancer   LoadBalancer   10.51.241.121   35.242.205.114   80:32281/TCP   42s
+```
+
+Both `LoadBalancer`s should be running now:
+
+```sh
+$ kubectl get svc --all-namespaces | grep LoadBalancer
+hashgenerator   hashgenerator-svc-loadbalancer   LoadBalancer   10.51.241.121   35.242.205.114   80:32281/TCP    6m17s
+pingpong        pingpong-svc-loadbalancer        LoadBalancer   10.51.246.118   34.89.233.5      80:31106/TCP    10m
+```
+
+It works:
+
+```sh
+$ curl http://35.242.205.114/
+Hello<br> 2020-07-27T16:55:59.611Z: 5fa214bc-a6a5-4fc7-ad28-8dd7c8bc0b53<br> 2%
+$ kubectl logs hashgenerator-dep-5764f96cc5-jrq4z --all-containers
+HASHGENERATOR_URL: http://hashgenerator-svc:2345/
+HASHFILE_PATH: undefined
+PINGPONG_URL: http://pingpong-svc.pingpong:6789/pingpong
+PINGPONGFILE_PATH: undefined
+Server started on: 3001
+::ffff:10.48.5.1 requested a hashFile + pingPongFile
+Writing to txt is disabled
+Server started on: 3002
+current: 2020-07-27T16:55:19.580Z: 6f2c833d-c268-4c92-a4a2-045710d48615
+current: 2020-07-27T16:55:24.581Z: 2b83ff58-b42d-4bb4-9c9a-8937bfa9e8f9
+current: 2020-07-27T16:55:29.586Z: 79261074-c50a-433e-8557-1d55269857d4
+current: 2020-07-27T16:55:34.591Z: 82d34fad-04b6-4227-97da-61d73baf418a
+```
+
+Delete the cluster:
+
+```
+$ gcloud container clusters delete dwk-cluster
+The following clusters will be deleted.
+ - [dwk-cluster] in [europe-west3]
+
+Do you want to continue (Y/n)?  y
+
+Deleting cluster dwk-cluster...⠹
+```

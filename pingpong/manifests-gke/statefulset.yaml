@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-pingpong-svc
+  namespace: pingpong
+spec:
+  type: ClusterIP
+  selector:
+    # Note to self: select via label!
+    app: postgres-pingpong
+  ports:
+    - name: db
+      port: 5432
+      protocol: TCP
+      targetPort: 5432
+---
+# A ConfigMap that creates the schema for the 'pingpongers' table
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-pingpong-seed
+  namespace: pingpong
+data:
+  seed.sql: |
+    CREATE TABLE pingpongers (id SERIAL PRIMARY KEY, name VARCHAR(30));
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-pingpong-stateful
+  namespace: pingpong
+spec:
+  serviceName: postgres-pingpong
+  selector:
+    matchLabels:
+      app: postgres-pingpong
+  template:
+    metadata:
+      labels:
+        app: postgres-pingpong
+    spec:
+      containers:
+        - name: db
+          image: postgres:10-alpine
+          env:
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          envFrom:
+            - secretRef:
+                name: postgres-pw
+          ports:
+            - name: db
+              containerPort: 5432
+          volumeMounts:
+            # mountpoint to store pg data
+            - name: postgres-pingpong-data
+              mountPath: /var/lib/postgresql/data/
+            - name: postgres-pingpong-seed
+              mountPath: /docker-entrypoint-initdb.d
+      volumes:
+        - name: postgres-pingpong-seed
+          configMap:
+            name: postgres-pingpong-seed
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-pingpong-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi

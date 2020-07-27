@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hashgenerator-dep
+  namespace: hashgenerator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hashgenerator
+  template:
+    metadata:
+      labels:
+        app: hashgenerator
+    spec:
+      containers:
+        - name: hashgenerator-server
+          image: movd/devopswithkubernetes-hashgenerator-server:sha-7221ef8
+          env:
+            - name: SERVER_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: hashgenerator-config-env-file
+                  key: SERVER_PORT
+            - name: HASHGENERATOR_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: hashgenerator-config-env-file
+                  key: HASHGENERATOR_URL
+            - name: PINGPONG_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: hashgenerator-config-env-file
+                  key: PINGPONG_URL
+            - name: MESSAGE
+              valueFrom:
+                configMapKeyRef:
+                  name: hashgenerator-config-env-file
+                  key: MESSAGE
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+        - name: hashgenerator
+          image: movd/devopswithkubernetes-hashgenerator:sha-3479d69
+          env:
+            - name: GENERATOR_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: hashgenerator-config-env-file
+                  key: GENERATOR_PORT
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: 50m
