@@ -2,10 +2,7 @@ import axios from "axios";
 
 import { NewTask, Todo } from "../types";
 
-let baseUrl = "http://localhost:8081/api/todos";
-if (process.env.NODE_ENV === "development") {
-  baseUrl = "http://localhost:3000/api/todos";
-}
+const baseUrl = "/api/todos";
 
 const fetchAll = async () => {
   const res = await axios.get(baseUrl);

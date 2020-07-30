@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: project-dep
+  namespace: project
+spec:
+  selector:
+    matchLabels:
+      app: project
+  template:
+    metadata:
+      labels:
+        app: project
+        foo: bar
+    spec:
+      volumes:
+        - name: project-volume
+          persistentVolumeClaim:
+            claimName: project-claim
+      initContainers:
+        - name: volume-mount-hack
+          image: alpine
+          command: ["sh", "-c", "chown -R 1000:1000 /app/build/public"] # Ref: <https://serverfault.com/a/907160>
+          volumeMounts:
+            - name: project-volume
+              mountPath: /app/build/public
+      containers:
+        - name: project-backend
+          image: PROJECT_BACKEND_IMAGE
+          envFrom:
+            - secretRef:
+                name: postgres-pw-url
+          resources:
+            limits:
+              memory: "128Mi"
+              # 125/1000 of a core = 12.5%
+              cpu: "125m"
+          volumeMounts:
+            - name: project-volume
+              mountPath: /app/build/public
+        - name: project-frontend
+          image: PROJECT_FRONTEND_IMAGE
+          resources:
+            limits:
+              memory: "128Mi"
+              # 125/1000 of a core = 12.5%
+              cpu: "125m"

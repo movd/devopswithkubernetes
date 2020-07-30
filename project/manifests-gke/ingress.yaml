@@ -1,0 +1,24 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: project-ingress
+  namespace: project
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: PathPrefix(`/api`)
+      services:
+        - name: project-svc
+          port: 3030
+    - kind: Rule
+      match: PathPrefix(`/`)
+      services:
+        - name: project-svc
+          port: 8080
+    - kind: Rule
+      match: PathPrefix(`/static`)
+      services:
+        - name: project-svc
+          port: 8080

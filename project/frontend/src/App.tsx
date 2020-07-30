@@ -7,10 +7,8 @@ import NewTodoForm from "./components/NewTodoForm";
 import todosService from "./services/todos";
 import { Todo } from "./types";
 
-let baseUrl = "http://localhost:8081/api";
-if (process.env.NODE_ENV === "development") {
-  baseUrl = "http://localhost:3000/api";
-}
+const baseUrl = "/api";
+
 const App: React.FC<{}> = () => {
   const [isFetching, setIsFetching] = useState(true);
   const [todos, setTodos] = useState<Todo[]>([]);

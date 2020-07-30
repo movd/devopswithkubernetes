@@ -2,8 +2,9 @@ name: colorcontent Release application
 
 on:
   push:
+    branches: [master]
     paths:
-      - "colorcontent/**"
+      - "colorcontent/*"
 
 env:
   PROJECT_ID: ${{ secrets.GKE_PROJECT_ID }}

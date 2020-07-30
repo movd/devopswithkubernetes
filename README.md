@@ -12,6 +12,8 @@ This repo contains my solutions for the exercises of <https://devopswithkubernet
     - [Exercise 2.08](#exercise-208)
   - [Solutions for Part 3](#solutions-for-part-3)
     - [Exercise 3.01](#exercise-301)
+    - [Exercise 3.02](#exercise-302)
+      - [Install Traefik v2 in my cluster](#install-traefik-v2-in-my-cluster)
 
 ## Solutions for Part 1
 
@@ -306,3 +308,41 @@ Do you want to continue (Y/n)?  y
 
 Deleting cluster dwk-cluster...⠹
 ```
+
+### Exercise 3.02
+
+At first I created a cluster `dwk-cluster` like in the [exercise before](exercise-301). I also decided to switch from the default GKE Ingress to Traefik v2. I had problems creating rewrite rules with Google's default Ingress ([it looks like I'm not the only one](https://github.com/kubernetes/ingress-gce/issues/109)). Since I need this function to prevent the backend and frontend of my CRUD app from interfering with each other, I decided to use Traefik v2 instead of the standard Ingress Controller. 
+
+#### Install Traefik v2 in my cluster
+
+```
+$ kubectl create namespace project
+namespace/project created
+$ kubectl config set-context --current --namespace=project
+Context "gke_dwk-gke-284614_europe-west3_dwk-cluster" modified.
+$ helm repo add traefik https://containous.github.io/traefik-helm-chart && \
+  helm repo update && \
+  helm install traefik traefik/traefik
+"traefik" has been added to your repositories
+Hang tight while we grab the latest from your chart repositories...
+...Successfully got an update from the "traefik" chart repository
+...Successfully got an update from the "loki" chart repository
+...Successfully got an update from the "stable" chart repository
+Update Complete. ⎈ Happy Helming!⎈
+NAME: traefik
+LAST DEPLOYED: Fri Jul 31 17:37:27 2020
+NAMESPACE: project
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+```
+
+The helm chart creates a LoadBalancer service. Like manually created Service in the exercise before this gets a public external IP address:
+
+```sh
+$ kubectl get service --watch
+NAME      TYPE           CLUSTER-IP     EXTERNAL-IP     PORT(S)                      AGE
+traefik   LoadBalancer   10.51.247.87   35.234.119.98   80:31601/TCP,443:30377/TCP   5m43s
+```
+
+With the cluster running and Traefik installed my automatic deployment for the project will work.
