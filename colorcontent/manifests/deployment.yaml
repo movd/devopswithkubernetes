@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dwk-environments
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dwk-environments
+  template:
+    metadata:
+      labels:
+        app: dwk-environments
+    spec:
+      containers:
+        - name: dwk-environments
+          image: PROJECT/IMAGE
+          resources:
+            limits:
+              memory: "128Mi"
+              # 125/1000 of a core = 12.5%
+              cpu: "125m"
