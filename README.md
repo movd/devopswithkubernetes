@@ -14,6 +14,7 @@ This repo contains my solutions for the exercises of <https://devopswithkubernet
     - [Exercise 3.01](#exercise-301)
     - [Exercise 3.02](#exercise-302)
       - [Install Traefik v2 in my cluster](#install-traefik-v2-in-my-cluster)
+    - [Exercise 3.05: DBaaS pro/cons list](#exercise-305-dbaas-procons-list)
 
 ## Solutions for Part 1
 
@@ -311,7 +312,7 @@ Deleting cluster dwk-cluster...⠹
 
 ### Exercise 3.02
 
-At first I created a cluster `dwk-cluster` like in the [exercise before](exercise-301). I also decided to switch from the default GKE Ingress to Traefik v2. I had problems creating rewrite rules with Google's default Ingress ([it looks like I'm not the only one](https://github.com/kubernetes/ingress-gce/issues/109)). Since I need this function to prevent the backend and frontend of my CRUD app from interfering with each other, I decided to use Traefik v2 instead of the standard Ingress Controller. 
+At first I created a cluster `dwk-cluster` like in the [exercise before](exercise-301). I also decided to switch from the default GKE Ingress to Traefik v2. I had problems creating rewrite rules with Google's default Ingress ([it looks like I'm not the only one](https://github.com/kubernetes/ingress-gce/issues/109)). Since I need this function to prevent the backend and frontend of my CRUD app from interfering with each other, I decided to use Traefik v2 instead of the standard Ingress Controller.
 
 #### Install Traefik v2 in my cluster
 
@@ -346,3 +347,22 @@ traefik   LoadBalancer   10.51.247.87   35.234.119.98   80:31601/TCP,443:30377/T
 ```
 
 With the cluster running and Traefik installed my automatic deployment for the project will work.
+
+### Exercise 3.05: DBaaS pro/cons list
+
+In the following a short pro and contra list which compares Database as a Service vs. self configured and deployed database solutions. I have informed myself about the subject at [DBaaS providers](https://www.snia.org/sites/default/orig/DSI2014/presentations/CloudStor/CashtonColeman_Database_Service_MySQL_Cloud_Final.pdf), in [magazine articles](https://www.cloudcomputing-insider.de/was-ist-database-as-a-service-dbaas-a-692502/) and forums<sup>[1](https://stackoverflow.com/questions/23766951/cloud-sql-vs-self-maintained-database), [2](https://news.ycombinator.com/item?id=19578890)</sup>.
+
+**Pros for DBaaS:**
+
+- Very easy to setup ➡️ no own know-how or personell necessary for the operation of the database server
+- scalability and elasticity
+- High Availability such as replications are provided
+- Easy backups (point in time recovery)
+- The billing is usage-based
+
+**Cons against DBaaS:**
+
+- The billing is usage-based ➡️ Unpredictable costs can arise during peak loads
+- You need to trust the provider: Legal requirements may prohibit storing personal data on servers of third parties
+- Upgrades must be installed by the provider
+- No far-reaching changes to the server configuration are possible
