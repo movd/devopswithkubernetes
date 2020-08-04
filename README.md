@@ -15,6 +15,7 @@ This repo contains my solutions for the exercises of <https://devopswithkubernet
     - [Exercise 3.02](#exercise-302)
       - [Install Traefik v2 in my cluster](#install-traefik-v2-in-my-cluster)
     - [Exercise 3.05: DBaaS pro/cons list](#exercise-305-dbaas-procons-list)
+    - [Exercise 3.06](#exercise-306)
 
 ## Solutions for Part 1
 
@@ -366,3 +367,11 @@ In the following a short pro and contra list which compares Database as a Servic
 - You need to trust the provider: Legal requirements may prohibit storing personal data on servers of third parties
 - Upgrades must be installed by the provider
 - No far-reaching changes to the server configuration are possible
+
+### Exercise 3.06
+
+Because I have already used PersistentVolumeClaims I stuck to it. To ensure that the data in the database is preserved, I [set the Reclaim policy to `Retain`](https://kubernetes.io/docs/tasks/administer-cluster/change-pv-reclaim-policy/) for the automatically created PersistentVolume of my PersistentVolumeClaim. (GKE takes care of creating the PV for the PVC).
+
+```sh
+$ kubectl patch pv pvc-e662f066-fb2d-4efa-98fe-130743e5f77a -p '{"spec":{"persistentVolumeReclaimPolicy":"Retain"}}'
+```
