@@ -1,0 +1,43 @@
+name: "Delete namespaced deployment on branch delete"
+
+on:
+  delete:
+    branches-ignore:
+      - master
+
+env:
+  PROJECT_ID: ${{ secrets.GKE_PROJECT_ID }}
+  GKE_CLUSTER: dwk-cluster
+  GKE_ZONE: europe-west3
+  DOCKERHUB_REPO: "docker.io/movd/devopswithkubernetes-project-backend"
+
+defaults:
+  run:
+    shell: bash
+    working-directory: project
+
+jobs:
+  build-publish-deploy:
+    name: Delete Deployment
+    runs-on: ubuntu-latest
+    steps:
+      - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          service_account_key: ${{ secrets.GKE_SA_KEY }}
+          project_id: ${{ secrets.GKE_PROJECT_ID }}
+
+      - run: gcloud --quiet auth configure-docker
+
+      - run: gcloud container clusters get-credentials "$GKE_CLUSTER" --zone "$GKE_ZONE"
+
+      - name: Set up Kustomize
+        run: |-
+          curl -sfLo kustomize https://github.com/kubernetes-sigs/kustomize/releases/download/v3.1.0/kustomize_3.1.0_linux_amd64
+          chmod u+x ./kustomize
+
+      - name: Delete namespace in Cluster
+        working-directory: project
+        run: |-
+          dns_save_namespace=$(sed 's/[^a-zA-Z0-9_]/-/g' <<< ${GITHUB_REF#refs/heads/})
+          echo $dns_save_namespace
+          kubectl delete namespace ${dns_save_namespace} || true
