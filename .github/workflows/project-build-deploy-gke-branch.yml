@@ -2,6 +2,8 @@ name: "build project-backend:latest"
 
 on:
   push:
+    branches-ignore:
+      - master
     paths:
       - "project/backend/**"
 
@@ -52,8 +54,10 @@ jobs:
       - name: Deploy App to Cluster
         working-directory: project
         run: |-
-          kubectl create namespace project || true
-          kubectl config set-context --current --namespace=project
-          ./kustomize edit set namespace project
+          dns_save_namespace=$(sed 's/[^a-zA-Z0-9_]/-/g' <<< ${GITHUB_REF#refs/heads/})
+          echo $dns_save_namespace
+          kubectl create namespace ${dns_save_namespace} || true
+          kubectl config set-context --current --namespace=${dns_save_namespace}
+          ./kustomize edit set namespace ${dns_save_namespace}
           ./kustomize edit set image PROJECT_BACKEND_IMAGE=$DOCKERHUB_REPO:sha-${GITHUB_SHA::7}
           kubectl apply -k .
