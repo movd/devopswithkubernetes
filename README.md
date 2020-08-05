@@ -11,11 +11,15 @@ This repo contains my solutions for the exercises of <https://devopswithkubernet
     - [Exercise 2.07](#exercise-207)
     - [Exercise 2.08](#exercise-208)
   - [Solutions for Part 3](#solutions-for-part-3)
-    - [Exercise 3.01](#exercise-301)
-    - [Exercise 3.02](#exercise-302)
+    - [Exercise 3.01: deploy main app and ping/pong to GKE](#exercise-301-deploy-main-app-and-pingpong-to-gke)
+    - [Exercise 3.02: automatic GKE deployment for project](#exercise-302-automatic-gke-deployment-for-project)
       - [Install Traefik v2 in my cluster](#install-traefik-v2-in-my-cluster)
+    - [Exercise 3.03: Namespace from git branch](#exercise-303-namespace-from-git-branch)
+    - [Exercise 3.04: Deleting namespace when branch gets deleted](#exercise-304-deleting-namespace-when-branch-gets-deleted)
     - [Exercise 3.05: DBaaS pro/cons list](#exercise-305-dbaas-procons-list)
-    - [Exercise 3.06](#exercise-306)
+    - [Exercise 3.06: Deciding between using PersistentVolumeClaim or Cloud SQL](#exercise-306-deciding-between-using-persistentvolumeclaim-or-cloud-sql)
+    - [Exercise 3.07 and 3.08: Ressource limits](#exercise-307-and-308-ressource-limits)
+    - [Exercise 3.09: Monitoring with GKE](#exercise-309-monitoring-with-gke)
 
 ## Solutions for Part 1
 
@@ -168,7 +172,7 @@ statefulset.apps/postgres-project-stateful created
 </pre>
 </td>
 <td width="30%">
-<code>http://localhost:8081/project</code><br><img src="frontend-screenshot.png" alt="Screenshot of frontend">
+<code>http://localhost:8081/project</code><br><img src="screenshots/frontend-screenshot.png" alt="Screenshot of frontend">
 </td>
 </tr> 
 </table>
@@ -194,11 +198,11 @@ Forwarding from [::1]:3000 -> 3000
 Handling connection for 3000
 ```
 
-![Screenshot of Grafana with Loki](grafana-loki-screenshot.png)
+![Screenshot of Grafana with Loki](screenshots/grafana-loki-screenshot.png)
 
 ## Solutions for Part 3
 
-### Exercise 3.01
+### Exercise 3.01: deploy main app and ping/pong to GKE
 
 Create cluster in Frankfurt with two nodes and connect to it:
 
@@ -311,7 +315,7 @@ Do you want to continue (Y/n)?  y
 Deleting cluster dwk-cluster...⠹
 ```
 
-### Exercise 3.02
+### Exercise 3.02: automatic GKE deployment for project
 
 At first I created a cluster `dwk-cluster` like in the [exercise before](exercise-301). I also decided to switch from the default GKE Ingress to Traefik v2. I had problems creating rewrite rules with Google's default Ingress ([it looks like I'm not the only one](https://github.com/kubernetes/ingress-gce/issues/109)). Since I need this function to prevent the backend and frontend of my CRUD app from interfering with each other, I decided to use Traefik v2 instead of the standard Ingress Controller.
 
@@ -349,6 +353,14 @@ traefik   LoadBalancer   10.51.247.87   35.234.119.98   80:31601/TCP,443:30377/T
 
 With the cluster running and Traefik installed my automatic deployment for the project will work.
 
+### Exercise 3.03: Namespace from git branch
+
+Added a new [Action workflow yaml](https://github.com/movd/devopswithkubernetes/blob/master/.github/workflows/project-build-deploy-gke-branch.yml) so that when pushing to a branch. The application gets deployed into a namespace with the same name as the branch.
+
+### Exercise 3.04: Deleting namespace when branch gets deleted
+
+Added a new a new Action workflow: [project-delete-branch-namespace.yml](https://github.com/movd/devopswithkubernetes/blob/master/.github/workflows/project-delete-branch-namespace.yml)
+
 ### Exercise 3.05: DBaaS pro/cons list
 
 In the following a short pro and contra list which compares Database as a Service vs. self configured and deployed database solutions. I have informed myself about the subject at [DBaaS providers](https://www.snia.org/sites/default/orig/DSI2014/presentations/CloudStor/CashtonColeman_Database_Service_MySQL_Cloud_Final.pdf), in [magazine articles](https://www.cloudcomputing-insider.de/was-ist-database-as-a-service-dbaas-a-692502/) and forums<sup>[1](https://stackoverflow.com/questions/23766951/cloud-sql-vs-self-maintained-database), [2](https://news.ycombinator.com/item?id=19578890)</sup>.
@@ -368,10 +380,28 @@ In the following a short pro and contra list which compares Database as a Servic
 - Upgrades must be installed by the provider
 - No far-reaching changes to the server configuration are possible
 
-### Exercise 3.06
+### Exercise 3.06: Deciding between using PersistentVolumeClaim or Cloud SQL
 
 Because I have already used PersistentVolumeClaims I stuck to it. To ensure that the data in the database is preserved, I [set the Reclaim policy to `Retain`](https://kubernetes.io/docs/tasks/administer-cluster/change-pv-reclaim-policy/) for the automatically created PersistentVolume of my PersistentVolumeClaim. (GKE takes care of creating the PV for the PVC).
 
 ```sh
 $ kubectl patch pv pvc-e662f066-fb2d-4efa-98fe-130743e5f77a -p '{"spec":{"persistentVolumeReclaimPolicy":"Retain"}}'
 ```
+
+### Exercise 3.07 and 3.08: Ressource limits
+
+As I already ran into ressource limits and quotas while using `k3d` and the [VScode Extension](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools) was constantly nagging me constantly to set `limits` my applications already had ressource tried and tested limits set.
+
+### Exercise 3.09: Monitoring with GKE
+
+While creating the cluster I added `--enable-stackdriver-kubernetes`:
+
+```sh
+gcloud container clusters create dwk-cluster --zone=europe-west3 --enable-stackdriver-kubernetes --num-nodes=2
+```
+
+Now I could marvel at both monitoring and logging in the Cloud Console:
+
+![Screenshot of GKE Monitoring](screenshots/monitoring-gke-overview.png)
+
+![Screenshot of Logging in GKE](screenshots/logging-gke-backend.png)
