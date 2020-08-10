@@ -1,9 +1,11 @@
 require("dotenv").config();
+const os = require("os");
 const express = require("express");
 const { Pool } = require("pg");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const hostname = os.hostname();
 
 const POSTGRES_USER = process.env.POSTGRES_USER || "postgres";
 const POSTGRES_PORT = process.env.POSTGRES_PORT || 5432;
@@ -52,25 +54,25 @@ app.get("/pingpong", async (req, res) => {
     );
     console.log("ping");
   } catch (error) {
-    return res.status(400).json({ error: error.message });
+    return res.status(400).json({ error: error.message, hostname });
   }
 
   try {
     const { rows } = await query("SELECT * FROM pingpongers");
     console.log("pong", rows.length);
-    return res.status(200).json({ counter: rows.length });
+    return res.status(200).json({ counter: rows.length, hostname });
   } catch (error) {
-    return res.status(400).json({ error: error.message });
+    return res.status(400).json({ error: error.message, hostname });
   }
 });
 
-app.get("/healthy", async (req, res) => {
+app.get("/healthz", async (req, res) => {
   try {
     await query("SELECT * FROM pingpongers");
     console.log(`health check from ${req.ip}`);
-    return res.status(200).json({ status: "connected to db" });
+    return res.status(200).json({ status: "connected to db", hostname });
   } catch (error) {
-    return res.status(400).json({ status: error.message });
+    return res.status(400).json({ status: error.message, hostname });
   }
 });
 
