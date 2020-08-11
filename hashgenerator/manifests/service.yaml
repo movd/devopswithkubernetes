@@ -13,6 +13,6 @@ spec:
       protocol: TCP
       targetPort: 3001
     - name: generator
-      port: 2345
+      port: 3002
       protocol: TCP
       targetPort: 3002

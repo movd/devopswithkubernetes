@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: hashgenerator-server
-          image: movd/devopswithkubernetes-hashgenerator-server:sha-7221ef8
+          image: movd/devopswithkubernetes-hashgenerator-server:sha-6f09039
           env:
             - name: SERVER_PORT
               valueFrom:
@@ -37,12 +37,20 @@ spec:
                 configMapKeyRef:
                   name: hashgenerator-config-env-file
                   key: MESSAGE
+          readinessProbe:
+            initialDelaySeconds: 0
+            timeoutSeconds: 3
+            periodSeconds: 5
+            successThreshold: 1
+            httpGet:
+              path: /healthz
+              port: 3001
           resources:
             limits:
               memory: "512Mi"
-              cpu: "500m"
+              cpu: "125m"
         - name: hashgenerator
-          image: movd/devopswithkubernetes-hashgenerator:sha-3479d69
+          image: movd/devopswithkubernetes-hashgenerator:sha-6f09039
           env:
             - name: GENERATOR_PORT
               valueFrom:
@@ -52,4 +60,4 @@ spec:
           resources:
             limits:
               memory: "512Mi"
-              cpu: "500m"
+              cpu: "125m"

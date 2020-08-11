@@ -15,7 +15,6 @@ spec:
       targetPort: 5432
 ---
 # A ConfigMap that creates the schema for the 'pingpongers' table
----
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -55,7 +54,7 @@ spec:
           volumeMounts:
             # mountpoint to store pg data
             - name: postgres-pingpong-data
-              mountPath: /var/lib/postgresql/data/pgdata
+              mountPath: /var/lib/postgresql/data/
             - name: postgres-pingpong-seed
               mountPath: /docker-entrypoint-initdb.d
       volumes:
@@ -67,7 +66,6 @@ spec:
         name: postgres-pingpong-data
       spec:
         accessModes: ["ReadWriteOnce"]
-        storageClassName: local-path
         resources:
           requests:
             storage: 1Gi

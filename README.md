@@ -20,6 +20,8 @@ This repo contains my solutions for the exercises of <https://devopswithkubernet
     - [Exercise 3.06: Deciding between using PersistentVolumeClaim or Cloud SQL](#exercise-306-deciding-between-using-persistentvolumeclaim-or-cloud-sql)
     - [Exercise 3.07 and 3.08: Ressource limits](#exercise-307-and-308-ressource-limits)
     - [Exercise 3.09: Monitoring with GKE](#exercise-309-monitoring-with-gke)
+  - [Solutions for Part 4](#solutions-for-part-4)
+    - [Exercise 4.01 Readiness Probes for pingpong and main app](#exercise-401-readiness-probes-for-pingpong-and-main-app)
 
 ## Solutions for Part 1
 
@@ -405,3 +407,115 @@ Now I could marvel at both monitoring and logging in the Cloud Console:
 ![Screenshot of GKE Monitoring](screenshots/monitoring-gke-overview.png)
 
 ![Screenshot of Logging in GKE](screenshots/logging-gke-backend.png)
+
+## Solutions for Part 4
+
+### Exercise 4.01 Readiness Probes for pingpong and main app
+
+**I. Readiness Probes for ping/pong app**
+
+When commenting out the environment variable section in `pingpong/manifests/deployment.yaml`. My app will default `POSTGRES_HOST` to `localhost` instead of right service address. Thus no connection to the database will succeed. The app is unhealhty. Steps to reproduce:
+
+Comment out env variables in `pingpong/manifests/deployment.yaml`:
+
+```yaml
+# env:
+#   - name: POSTGRES_HOST
+#     value: "postgres-pingpong-svc"
+```
+
+Apply the manifests:
+
+```sh
+$ kubectl apply -f pingpong/manifests
+$ kubectl get pod --watch
+NAME                            READY   STATUS    RESTARTS   AGE
+pingpong-dep-588f7f998d-9b5f7   0/1     Running   0          7s
+pingpong-dep-588f7f998d-9kjlp   0/1     Running   0          7s
+pingpong-dep-588f7f998d-pkb9z   0/1     Running   0          7s
+```
+
+Why is it not entering Ready state???
+
+```sh
+$ kubectl describe pod pingpong-dep-588f7f998d-9b5f7
+...
+Events:
+  Type     Reason     Age               From               Message
+  [...]
+  Normal   Created    36s               kubelet, minikube  Created container pingpong
+  Normal   Started    36s               kubelet, minikube  Started container pingpong
+  Warning  Unhealthy  0s (x7 over 30s)  kubelet, minikube  Readiness probe failed: HTTP probe failed
+```
+
+My `/healthz` endpoint returns the following output:
+
+```
+$ kubectl port-forward pingpong-dep-588f7f998d-9b5f7 3000:3000
+$ curl -s localhost:3000/healthz | jq '.'
+{
+  "status": "connect ECONNREFUSED 127.0.0.1:5432",
+  "hostname": "pingpong-dep-588f7f998d-9b5f7"
+}
+$ curl -sI localhost:3000/healthz
+HTTP/1.1 400 Bad Request
+[...]
+```
+
+Fixing the `deployment.yaml` be uncommenting the env variable:
+
+```yaml
+    spec:
+      containers:
+        - name: pingpong
+          image: movd/devopswithkubernetes-pingpong:sha-746a640
+          env:
+            - name: POSTGRES_HOST
+              value: "postgres-pingpong-svc"
+              ...
+```
+
+After reapplying the manifests all pods are started sucessfully.
+
+```sh
+$ kubectl apply -f pingpong/manifests
+$ kubectl get pod --watch
+NAME                            READY   STATUS    RESTARTS   AGE
+pingpong-dep-567dbf4bd9-cnnws   0/1     Running   0          3s
+pingpong-dep-567dbf4bd9-frdwp   1/1     Running   0          14s
+pingpong-dep-567dbf4bd9-sg5vv   1/1     Running   0          8s
+pingpong-dep-588f7f998d-9b5f7   0/1     Running   0          12m
+postgres-pingpong-stateful-0    1/1     Running   0          12m
+pingpong-dep-567dbf4bd9-cnnws   1/1     Running   0          4s
+pingpong-dep-588f7f998d-9b5f7   0/1     Terminating   0          12m
+```
+
+**II. Readiness Probes for hashgenerator (main app)**
+
+If the previously created deployment of the pingpong app is deleted, the main application will not become Ready. I'll be brief this time:
+
+```sh
+$ kubectl create configmap hashgenerator-config-env-file --from-env-file manifests/hashgenerator-env-file.properties
+configmap/hashgenerator-config-env-file created
+$ kubectl apply -f hashgenerator/manifests
+deployment.apps/hashgenerator-dep created
+...
+$ kubectl delete -f pingpong/manifests
+deployment.apps "pingpong-dep" deleted
+...
+$ kubectl rollout restart deployment hashgenerator-dep
+deployment.apps/hashgenerator-dep restarted
+...
+$ kubectl get pods --watch
+NAME                                 READY   STATUS    RESTARTS   AGE
+hashgenerator-dep-5b84db6b5b-jtsf6   1/2     Running   0          4m19s
+hashgenerator-dep-8677c5f6b8-8gd98   1/2     Running   0          24s
+$ kubectl describe pods hashgenerator-dep-8677c5f6b8-8gd98
+[...]
+Events:
+  Type     Reason     Age               From               Message
+  [...]
+  Normal   Created    45s               kubelet, minikube  Created container hashgenerator
+  Normal   Started    45s               kubelet, minikube  Started container hashgenerator
+  Warning  Unhealthy  5s (x9 over 45s)  kubelet, minikube  Readiness probe failed: HTTP probe failed with statuscode: 400
+```

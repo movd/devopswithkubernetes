@@ -4,6 +4,7 @@ metadata:
   name: pingpong-dep
   namespace: pingpong
 spec:
+  replicas: 3
   selector:
     matchLabels:
       app: pingpong
@@ -14,29 +15,22 @@ spec:
     spec:
       containers:
         - name: pingpong
-          image: movd/devopswithkubernetes-pingpong:sha-14f5389
+          image: movd/devopswithkubernetes-pingpong:sha-746a640
           env:
-            # These two ideally would go into a ConfigMap
-            - name: ENABLE_DB
-              value: "true"
             - name: POSTGRES_HOST
               value: "postgres-pingpong-svc"
           envFrom:
             - secretRef:
-                name: postgres-pw-url
-          resources:
-            limits:
-              memory: "512Mi"
-              cpu: "500m"
-        - name: psql-client
-          # Just random alpine Image I found that has the psql-client installed
-          # Keep it idling to debug the db connection
-          image: jbergknoff/postgresql-client
-          command: ["tail", "-f", "/dev/null"]
-          envFrom:
-            - secretRef:
                 name: postgres-pw
+          readinessProbe:
+            initialDelaySeconds: 0
+            timeoutSeconds: 3
+            periodSeconds: 5
+            successThreshold: 1
+            httpGet:
+              path: /healthz
+              port: 3000
           resources:
             limits:
               memory: "512Mi"
-              cpu: "500m"
+              cpu: "125m"
