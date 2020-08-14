@@ -1,4 +1,5 @@
 import { Request, Response, Router } from 'express';
+import os from 'os';
 
 import { Task } from '../models';
 import { toNewTask } from '../typeguards';
@@ -7,7 +8,9 @@ const router = Router();
 
 router.get('/', async (_req, res: Response) => {
   try {
-    res.status(200).json({ todos: await Task.findAll() });
+    res
+      .status(200)
+      .json({ todos: await Task.findAll(), hostname: os.hostname() });
   } catch (error) {
     if (error instanceof Error) {
       res.status(400).send(error.message);
