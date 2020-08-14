@@ -8,7 +8,8 @@ spec:
     - web
   routes:
     - kind: Rule
-      match: PathPrefix(`/api`)
+      # prevent /api/healthz from being publicly accessible
+      match: (PathPrefix(`/api/todos`)||PathPrefix(`/api/static`))
       services:
         - name: project-svc
           port: 3030

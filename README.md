@@ -22,6 +22,7 @@ This repo contains my solutions for the exercises of <https://devopswithkubernet
     - [Exercise 3.09: Monitoring with GKE](#exercise-309-monitoring-with-gke)
   - [Solutions for Part 4](#solutions-for-part-4)
     - [Exercise 4.01 Readiness Probes for pingpong and main app](#exercise-401-readiness-probes-for-pingpong-and-main-app)
+    - [Exercise 4.02 Readiness and Liveness Probes for frontend/backemd of project](#exercise-402-readiness-and-liveness-probes-for-frontendbackemd-of-project)
 
 ## Solutions for Part 1
 
@@ -412,9 +413,13 @@ Now I could marvel at both monitoring and logging in the Cloud Console:
 
 ### Exercise 4.01 Readiness Probes for pingpong and main app
 
+_All steps in my solutions to this exercise were executed on a local minikube cluster with the [NGINX Ingress controller installed](https://kubernetes.io/docs/tasks/access-application-cluster/ingress-minikube/). The configuration should be the same on GKE._
+
 **I. Readiness Probes for ping/pong app**
 
-When commenting out the environment variable section in `pingpong/manifests/deployment.yaml`. My app will default `POSTGRES_HOST` to `localhost` instead of right service address. Thus no connection to the database will succeed. The app is unhealhty. Steps to reproduce:
+When commenting out the environment variable section in `pingpong/manifests/deployment.yaml`. My app will default `POSTGRES_HOST` to `localhost` instead of right service address. Thus no connection to the database will succeed. The app is unhealhty.
+
+Steps to reproduce:
 
 Comment out env variables in `pingpong/manifests/deployment.yaml`:
 
@@ -519,3 +524,50 @@ Events:
   Normal   Started    45s               kubelet, minikube  Started container hashgenerator
   Warning  Unhealthy  5s (x9 over 45s)  kubelet, minikube  Readiness probe failed: HTTP probe failed with statuscode: 400
 ```
+
+### Exercise 4.02 Readiness and Liveness Probes for frontend/backemd of project
+
+_This exercise was solved via a GKE cluster._
+
+The application has an API endpoint [`:3000/api/healthz`](https://github.com/movd/devopswithkubernetes/blob/master/project/backend/src/routes/healthz.ts). If wrong database credentials are set up or the connection to the database times out the backend container becomes unhealthy. The frontend is checked at `:80/` (nginx).
+
+To try out how my app behaves when no volumes are mounted I commented out the PersistentVolumeClaims.
+
+<table>
+<tr>
+<td width="45%" valign="top">
+Backend probes
+<pre lang="yaml">
+          readinessProbe:
+            initialDelaySeconds: 5
+            timeoutSeconds: 5
+            periodSeconds: 5
+            failureThreshold: 5
+            successThreshold: 1
+            httpGet:
+              path: /api/healthz?readiness
+              port: 3000
+          livenessProbe:
+            initialDelaySeconds: 30
+            periodSeconds: 60 # every 60 seconds
+            failureThreshold: 10
+            httpGet:
+              path: /api/healthz?liveness
+              port: 3000
+</pre>
+</td>
+<td width="45%" valign="top">
+Frontend probe
+<pre lang="yaml">
+          readinessProbe:
+            initialDelaySeconds: 1
+            timeoutSeconds: 5
+            periodSeconds: 5
+            successThreshold: 1
+            httpGet:
+              path: /
+              port: 80
+</pre>
+</td>
+</tr> 
+</table>
