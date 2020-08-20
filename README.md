@@ -23,6 +23,7 @@ This repo contains my solutions for the exercises of <https://devopswithkubernet
   - [Solutions for Part 4](#solutions-for-part-4)
     - [Exercise 4.01 Readiness Probes for pingpong and main app](#exercise-401-readiness-probes-for-pingpong-and-main-app)
     - [Exercise 4.02 Readiness and Liveness Probes for frontend/backend of project](#exercise-402-readiness-and-liveness-probes-for-frontendbackend-of-project)
+    - [Exercise 4.03 Prometheus](#exercise-403-prometheus)
 
 ## Solutions for Part 1
 
@@ -571,3 +572,27 @@ Frontend probe
 </td>
 </tr> 
 </table>
+
+### Exercise 4.03 Prometheus
+
+_This exercise was solved via a GKE cluster._
+
+Installed Prometheus via helm like show in the course notes.
+
+```
+$ kubectl port-forward prometheus-prometheus-operator-159793-prometheus-0 9090 &
+Forwarding from [::1]:9090 -> 9090
+Handling connection for 9090
+```
+
+<http://localhost:9090>
+
+![Screenshot of Prometheus](screenshots/prometheus-kube_pod_info.png)
+
+`scalar(sum(kube_pod_info{namespace="prometheus", created_by_kind="StatefulSet"}))`
+
+returns:
+
+| Element | Value |
+| ------- | ----- |
+| scalar  | 2     |
