@@ -4,7 +4,7 @@ import { Task } from '../models';
 const router = Router();
 
 const resolveInThreeSeconds = () => {
-  return new Promise((resolve) => {
+  return new Promise<number>((resolve) => {
     setTimeout(() => resolve(3), 3000);
   });
 };
@@ -16,15 +16,15 @@ router.get('/', async (_req, res: Response) => {
     const results = await Promise.race(asyncFunctions);
 
     if (results === 3) {
-      res
+      return res
         .status(400)
         .json({ status: 'could not connect to db in less than 3 seconds' });
     }
 
-    res.status(200).json({ status: 'connected' });
+    return res.status(200).json({ status: 'connected' });
   } catch (error) {
     if (error instanceof Error) {
-      res.status(400).json({ error: error.message });
+      return res.status(400).json({ error: error.message });
     } else {
       throw error;
     }

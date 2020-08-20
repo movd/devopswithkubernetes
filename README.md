@@ -22,7 +22,7 @@ This repo contains my solutions for the exercises of <https://devopswithkubernet
     - [Exercise 3.09: Monitoring with GKE](#exercise-309-monitoring-with-gke)
   - [Solutions for Part 4](#solutions-for-part-4)
     - [Exercise 4.01 Readiness Probes for pingpong and main app](#exercise-401-readiness-probes-for-pingpong-and-main-app)
-    - [Exercise 4.02 Readiness and Liveness Probes for frontend/backemd of project](#exercise-402-readiness-and-liveness-probes-for-frontendbackemd-of-project)
+    - [Exercise 4.02 Readiness and Liveness Probes for frontend/backend of project](#exercise-402-readiness-and-liveness-probes-for-frontendbackend-of-project)
 
 ## Solutions for Part 1
 
@@ -417,7 +417,7 @@ _All steps in my solutions to this exercise were executed on a local minikube cl
 
 **I. Readiness Probes for ping/pong app**
 
-When commenting out the environment variable section in `pingpong/manifests/deployment.yaml`. My app will default `POSTGRES_HOST` to `localhost` instead of right service address. Thus no connection to the database will succeed. The app is unhealhty.
+When commenting out the environment variable section in `pingpong/manifests/deployment.yaml`. My app will default `POSTGRES_HOST` to `localhost` instead of right the service hostname. Thus no connection to the database will succeed. The app is unhealhty.
 
 Steps to reproduce:
 
@@ -525,7 +525,7 @@ Events:
   Warning  Unhealthy  5s (x9 over 45s)  kubelet, minikube  Readiness probe failed: HTTP probe failed with statuscode: 400
 ```
 
-### Exercise 4.02 Readiness and Liveness Probes for frontend/backemd of project
+### Exercise 4.02 Readiness and Liveness Probes for frontend/backend of project
 
 _This exercise was solved via a GKE cluster._
 

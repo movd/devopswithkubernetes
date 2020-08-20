@@ -1,6 +1,6 @@
 {
   "name": "project",
-  "version": "1.4.0",
+  "version": "1.7.1",
   "description": "A todo CRUD application written in TypeScript.",
   "main": "build/src/index.js",
   "scripts": {
