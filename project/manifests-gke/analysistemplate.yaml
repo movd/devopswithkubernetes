@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: memory-consumption-after-start
+  namespace: project
+spec:
+  metrics:
+    - name: memory-consumption-after-start
+      # initialDelay: 1
+      interval: 10s
+      count: 60 # 10s * 60 = 600s = 10 min
+      successCondition: result < 652.8 # Based on my ressource limits(128*6)*0,85
+      provider:
+        prometheus:
+          address: http://prometheus-operator-159793-prometheus.prometheus.svc:9090
+          query: |
+            scalar(
+              sum(
+                container_memory_working_set_bytes{
+                  name!~"POD", 
+                  namespace="project",
+                  container=~"project-frontend|project-backend"}/(10^6)
+              ) 
+            )

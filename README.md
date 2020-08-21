@@ -24,6 +24,7 @@ This repo contains my solutions for the exercises of <https://devopswithkubernet
     - [Exercise 4.01 Readiness Probes for pingpong and main app](#exercise-401-readiness-probes-for-pingpong-and-main-app)
     - [Exercise 4.02 Readiness and Liveness Probes for frontend/backend of project](#exercise-402-readiness-and-liveness-probes-for-frontendbackend-of-project)
     - [Exercise 4.03 Prometheus](#exercise-403-prometheus)
+    - [Exercises 4.04 Canary release with AnalysisTemplate](#exercises-404-canary-release-with-analysistemplate)
 
 ## Solutions for Part 1
 
@@ -580,7 +581,7 @@ _This exercise was solved via a GKE cluster._
 Installed Prometheus via helm like show in the course notes.
 
 ```
-$ kubectl port-forward prometheus-prometheus-operator-159793-prometheus-0 9090 &
+$ kubectl port-forward -n prometheus prometheus-prometheus-operator-159793-prometheus-0 9090 &
 Forwarding from [::1]:9090 -> 9090
 Handling connection for 9090
 ```
@@ -596,3 +597,92 @@ returns:
 | Element | Value |
 | ------- | ----- |
 | scalar  | 2     |
+
+### Exercises 4.04 Canary release with AnalysisTemplate
+
+My test runs for 10 minutes and checks that the memory consumption does not exceed 652.8 Mb. _Based on my memory ressource limits per container (128*6)*0.85_.
+
+First I deleted the Deployment, switched to a Rollout and added my [AnalysisTemplate](https://github.com/movd/devopswithkubernetes/blob/master/project/manifests-gke/analysistemplate.yaml).
+
+```sh
+$ kubectl apply -n argo-rollouts -f https://raw.githubusercontent.com/argoproj/argo-rollouts/stable/manifests/install.yaml
+customresourcedefinition.apiextensions.k8s.io/analysisruns.argoproj.io unchanged
+[...]
+$ kubectl delete deployments.apps project-dep
+deployment.apps "project-dep" deleted
+$ kubectl apply -f project/manifests-gke/analysistemplate.yaml
+analysistemplate.argoproj.io/memory-consumption-after-start created
+$ kubectl apply -f project/manifests-gke/rollout.yaml
+rollout.argoproj.io/project-dep created
+```
+
+After that I updated the backend from 1.7.0 to 1.7.1 in `rollout.yaml`:
+
+```
+$ kubectl apply -f project/manifests-gke/rollout.yaml
+rollout.argoproj.io/project-dep configured
+$ kubectl get analysisruns.argoproj.io project-dep-86c4f867f-4-1 --watch
+NAME                        STATUS
+project-dep-86c4f867f-4-1   Running
+project-dep-86c4f867f-4-1   Running
+```
+
+I have configured it so that 25% of my pods are tested for 10 minutes before the upgrade is rolled out completly. With my 3 replicas, this results in one extra pod, running the newer version:
+
+```sh
+$ kubectl get pods
+NAME                           READY   STATUS    RESTARTS   AGE
+postgres-project-stateful-0    1/1     Running   0          22h
+project-dep-7c74d795d4-mhpkb   2/2     Running   0          6m3s
+project-dep-7c74d795d4-srcxs   2/2     Running   0          6m3s
+project-dep-7c74d795d4-vlrkx   2/2     Running   0          6m3s
+project-dep-86c4f867f-7fm65    2/2     Running   0          14s
+```
+
+The newest pod is running v1.7.1:
+
+```sh
+$ kubectl get pod \
+    -o=jsonpath='{range .items[*]}{.metadata.namespace}, {.metadata.name}, {.spec.containers[].image}{"\n"}'
+project, postgres-project-stateful-0, postgres:10-alpine
+project, project-dep-7c74d795d4-mhpkb, docker.io/movd/devopswithkubernetes-project-backend:v1.7.0
+project, project-dep-7c74d795d4-srcxs, docker.io/movd/devopswithkubernetes-project-backend:v1.7.0
+project, project-dep-7c74d795d4-vlrkx, docker.io/movd/devopswithkubernetes-project-backend:v1.7.0
+project, project-dep-86c4f867f-7fm65, docker.io/movd/devopswithkubernetes-project-backend:v1.7.1
+```
+
+_Thanks to eldada for this very [handy snippet](https://github.com/eldada/kubernetes-scripts#get-formatted-list-of-container-images-in-pods)!_
+
+Now some users could already use the new version. _For this, to work I added the hostname of the pod to the API response._
+
+```sh
+$ while sleep 1; do curl -s http://35.234.93.113/api/todos | jq '.hostname'; done
+"project-dep-7c74d795d4-mhpkb"
+"project-dep-7c74d795d4-vlrkx"
+"project-dep-7c74d795d4-srcxs"
+"project-dep-86c4f867f-7fm65" # Pod with new version
+"project-dep-7c74d795d4-mhpkb"
+```
+
+After testing for ten minutes two additional replicas got added with the new version. All old called `project-dep-7c74d795d-*` where deleted.
+
+```sh
+$ do kubectl get pods --watch
+NAME                           READY   STATUS        RESTARTS   AGE
+postgres-project-stateful-0    1/1     Running       0          22h
+project-dep-7c74d795d4-mhpkb   0/2     Terminating   0          16m
+project-dep-86c4f867f-7fm65    2/2     Running       0          10m
+project-dep-86c4f867f-d2t72    2/2     Running       0          30s
+project-dep-86c4f867f-f4f9p    2/2     Running       0          19s
+```
+
+All pods now run the newest version:
+
+```sh
+$ kubectl get pod \
+    -o=jsonpath='{range .items[*]}{.metadata.namespace}, {.metadata.name}, {.spec.containers[].image}{"\n"}'
+project, postgres-project-stateful-0, postgres:10-alpine
+project, project-dep-86c4f867f-7fm65, docker.io/movd/devopswithkubernetes-project-backend:v1.7.1
+project, project-dep-86c4f867f-d2t72, docker.io/movd/devopswithkubernetes-project-backend:v1.7.1
+project, project-dep-86c4f867f-f4f9p, docker.io/movd/devopswithkubernetes-project-backend:v1.7.1
+```

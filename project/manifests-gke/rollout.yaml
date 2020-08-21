@@ -1,0 +1,66 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: project-dep
+  namespace: project
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: project
+  strategy:
+    canary:
+      steps:
+        - setWeight: 25
+        - analysis:
+            templates:
+              - templateName: memory-consumption-after-start
+  template:
+    metadata:
+      labels:
+        app: project
+        foo: bar
+    spec:
+      containers:
+        - name: project-backend
+          image: docker.io/movd/devopswithkubernetes-project-backend:v1.7.0
+          envFrom:
+            - secretRef:
+                name: postgres-pw-url
+          readinessProbe:
+            initialDelaySeconds: 5
+            timeoutSeconds: 5
+            periodSeconds: 5
+            failureThreshold: 5
+            successThreshold: 1
+            httpGet:
+              path: /api/healthz?readiness
+              port: 3000
+          livenessProbe:
+            initialDelaySeconds: 30
+            periodSeconds: 60 # every 60 seconds
+            failureThreshold: 10
+            httpGet:
+              path: /api/healthz?liveness
+              port: 3000
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "125m"
+          # volumeMounts:
+          #   - name: project-volume
+          #     mountPath: /app/build/public
+        - name: project-frontend
+          image: movd/devopswithkubernetes-project-frontend:v1.4.0
+          readinessProbe:
+            initialDelaySeconds: 1
+            timeoutSeconds: 5
+            periodSeconds: 5
+            successThreshold: 1
+            httpGet:
+              path: /
+              port: 80
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "125m"
