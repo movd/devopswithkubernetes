@@ -24,7 +24,8 @@ This repo contains my solutions for the exercises of <https://devopswithkubernet
     - [Exercise 4.01 Readiness Probes for pingpong and main app](#exercise-401-readiness-probes-for-pingpong-and-main-app)
     - [Exercise 4.02 Readiness and Liveness Probes for frontend/backend of project](#exercise-402-readiness-and-liveness-probes-for-frontendbackend-of-project)
     - [Exercise 4.03 Prometheus](#exercise-403-prometheus)
-    - [Exercises 4.04 Canary release with AnalysisTemplate](#exercises-404-canary-release-with-analysistemplate)
+    - [Exercise 4.04 Canary release with AnalysisTemplate](#exercise-404-canary-release-with-analysistemplate)
+    - [Exercise 4.05 PUT Route for project](#exercise-405-put-route-for-project)
 
 ## Solutions for Part 1
 
@@ -598,7 +599,7 @@ returns:
 | ------- | ----- |
 | scalar  | 2     |
 
-### Exercises 4.04 Canary release with AnalysisTemplate
+### Exercise 4.04 Canary release with AnalysisTemplate
 
 My test runs for 10 minutes and checks that the memory consumption does not exceed 652.8 Mb. _Based on my memory ressource limits per container (128*6)*0.85_.
 
@@ -686,3 +687,28 @@ project, project-dep-86c4f867f-7fm65, docker.io/movd/devopswithkubernetes-projec
 project, project-dep-86c4f867f-d2t72, docker.io/movd/devopswithkubernetes-project-backend:v1.7.1
 project, project-dep-86c4f867f-f4f9p, docker.io/movd/devopswithkubernetes-project-backend:v1.7.1
 ```
+
+### Exercise 4.05 PUT Route for project
+
+```sh
+$ curl -s -X GET http://35.234.93.113/api/todos | jq '.todos'
+[
+  {
+    "id": "b4be36c5-14ea-4429-bfb4-a169993d013d",
+    "userId": null,
+    "task": "Buy milk",
+    "done": false,
+    "createdAt": "2020-08-21T12:45:51.104Z",
+    "updatedAt": "2020-08-21T12:45:51.104Z"
+  }
+]
+$ curl -s -X PUT -H "Content-Type: application/json" \ 
+  -d '{"task": "Buy milk","done": true}' \
+   http://35.234.93.113/api/todos/b4be36c5-14ea-4429-bfb4-a169993d013d | jq
+{
+  "task": "Buy milk",
+  "done": true,
+  "id": "b4be36c5-14ea-4429-bfb4-a169993d013d"
+}
+```
+
