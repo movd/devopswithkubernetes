@@ -1,0 +1,60 @@
+name: "build project-broadcaster:latest"
+
+on:
+  push:
+    paths:
+      - "project/broadcaster/**"
+
+env:
+  PROJECT_ID: ${{ secrets.GKE_PROJECT_ID }}
+  GKE_CLUSTER: dwk-cluster
+  GKE_ZONE: europe-west3
+  DOCKERHUB_REPO: "docker.io/movd/devopswithkubernetes-project-broadcaster"
+
+defaults:
+  run:
+    shell: bash
+    working-directory: project
+
+jobs:
+  build-publish-deploy:
+    name: Build, Publish and Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout GitHub Action"
+        uses: actions/checkout@v2
+
+      - name: Build Image and push to hub.docker.com
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+          repository: ${{ env.DOCKERHUB_REPO }}
+          path: project/broadcaster
+          tags: latest
+          tag_with_ref: true
+          tag_with_sha: true # Same as ${GITHUB_SHA::7}
+
+
+      # - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+      #   with:
+      #     service_account_key: ${{ secrets.GKE_SA_KEY }}
+      #     project_id: ${{ secrets.GKE_PROJECT_ID }}
+
+      # - run: gcloud --quiet auth configure-docker
+
+      # - run: gcloud container clusters get-credentials "$GKE_CLUSTER" --zone "$GKE_ZONE"
+
+      # - name: Set up Kustomize
+      #   run: |-
+      #     curl -sfLo kustomize https://github.com/kubernetes-sigs/kustomize/releases/download/v3.1.0/kustomize_3.1.0_linux_amd64
+      #     chmod u+x ./kustomize
+
+      # - name: Deploy App to Cluster
+      #   working-directory: project
+      #   run: |-
+      #     kubectl create namespace project || true
+      #     kubectl config set-context --current --namespace=project
+      #     ./kustomize edit set namespace project
+      #     ./kustomize edit set image PROJECT_BACKEND_IMAGE=$DOCKERHUB_REPO:sha-${GITHUB_SHA::7}
+      #     kubectl apply -k .
