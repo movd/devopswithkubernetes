@@ -1,8 +1,10 @@
 import { Request, Response, Router } from 'express';
 import os from 'os';
 
+import { NATS_URL } from '../setup';
 import { Task } from '../models';
 import { toNewTask } from '../typeguards';
+import { sendTaskToNATS } from '../services/nats';
 
 const router = Router();
 
@@ -23,6 +25,7 @@ router.get('/', async (_req, res: Response) => {
 router.post('/', async (req: Request, res: Response) => {
   try {
     const addedTask = await Task.create(toNewTask(req.body));
+    if (NATS_URL) await sendTaskToNATS('created', addedTask);
     return res.status(201).json({ newTodo: addedTask });
   } catch (error) {
     if (error instanceof Error) {
@@ -62,8 +65,14 @@ router.get('/:id', async (req: Request, res: Response) => {
 
 router.delete('/:id', async (req: Request, res: Response) => {
   const { id } = req.params;
+  console.log(id);
   try {
-    await Task.destroy({ where: { id } });
+    const taskToDelete = await Task.findByPk(id);
+    const deletedRows = await Task.destroy({ where: { id } });
+    if (deletedRows === 0) {
+      return res.status(404).json({});
+    }
+    if (NATS_URL) await sendTaskToNATS('deleted', taskToDelete);
     return res.status(204).json({});
   } catch (error) {
     if (error instanceof Error) {
@@ -82,12 +91,18 @@ router.put('/:id', async (req: Request, res: Response) => {
     // only proceed if task if found by id
     if (await Task.findByPk(id)) {
       const taskToUpdate = toNewTask(req.body);
-      await Task.update(
+      // Set returning so that elem[1] of return array includes updated tuplets/values
+      // Desctructure elem[1] = Model
+      const [, updatedTuplets] = await Task.update(
         { task: taskToUpdate.task, done: taskToUpdate.done },
-        { where: { id } }
+        { where: { id }, returning: true }
       );
 
-      return res.status(200).json({ ...taskToUpdate, id });
+      // Desctructure further to just get updated Task
+      const [updatedTask] = updatedTuplets;
+      if (NATS_URL) await sendTaskToNATS('updated', updatedTask);
+
+      return res.status(200).json(updatedTask);
     } else {
       return res.status(404).json();
     }

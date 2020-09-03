@@ -1,11 +1,11 @@
 {
   "name": "project",
-  "version": "1.7.1",
+  "version": "2.0.0",
   "description": "A todo CRUD application written in TypeScript.",
   "main": "build/src/index.js",
   "scripts": {
     "tsc": "tsc && mkdir -p build/public",
-    "dev": "cross-env NODE_ENV=development ts-node-dev src/index.ts",
+    "dev": "cross-env NODE_ENV=development ts-node-dev --watch .env src/index.ts",
     "start": "cross-env NODE_ENV=production node build/index.js",
     "lint": "eslint --ext .ts .",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -33,6 +33,7 @@
     "morgan": "^1.10.0",
     "pg": "^8.3.0",
     "pg-hstore": "^2.3.3",
-    "sequelize": "^6.3.3"
+    "sequelize": "^6.3.3",
+    "ts-nats": "^1.2.15"
   }
 }
