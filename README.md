@@ -26,6 +26,9 @@ This repo contains my solutions for the exercises of <https://devopswithkubernet
     - [Exercise 4.03 Prometheus](#exercise-403-prometheus)
     - [Exercise 4.04 Canary release with AnalysisTemplate](#exercise-404-canary-release-with-analysistemplate)
     - [Exercise 4.05 PUT Route for project](#exercise-405-put-route-for-project)
+    - [Exercise 4.06 Add NATS to project](#exercise-406-add-nats-to-project)
+      - [NATS for `project-backend`](#nats-for-project-backend)
+      - [`project-broadcaster`: NATS to Telegram](#project-broadcaster-nats-to-telegram)
 
 ## Solutions for Part 1
 
@@ -702,7 +705,7 @@ $ curl -s -X GET http://35.234.93.113/api/todos | jq '.todos'
     "updatedAt": "2020-08-21T12:45:51.104Z"
   }
 ]
-$ curl -s -X PUT -H "Content-Type: application/json" \ 
+$ curl -s -X PUT -H "Content-Type: application/json" \
   -d '{"task": "Buy milk","done": true}' \
    http://35.234.93.113/api/todos/b4be36c5-14ea-4429-bfb4-a169993d013d | jq
 {
@@ -711,4 +714,48 @@ $ curl -s -X PUT -H "Content-Type: application/json" \
   "id": "b4be36c5-14ea-4429-bfb4-a169993d013d"
 }
 ```
+
+### Exercise 4.06 Add NATS to project
+
+#### NATS for `project-backend`
+
+If the `NATS_URL` environment variable is set the backend sends messages to NATS on create, update, and deletion of tasks:
+
+| Action                 | NATS queue      | NATS payload              |
+| ---------------------- | --------------- | ------------------------- |
+| POST /api/todos        | `todos.created` | JSON of created task      |
+| PUT /api/todos/uuid    | `todos.updated` | JSON of updated task      |
+| DELETE /api/todos/uuid | `todos.deleted` | JSON of just deleted task |
+
+The JSON objects stem directly from sequelizeand always contains:  
+`{id:uuidv4, userId: null, task: string, done: boolean, createdAt: timestamp, updatedAt: timestamp}`
+
+
+#### `project-broadcaster`: NATS to Telegram
+
+"project-broadcaster" is subscribing to NATS. It listens to messages that are sent by the backend to either the queue "todos.created", "todos.updated" or "todos.deleted". The JSON payload gets forwarded in a message to a Telegram Chat informing the admin on the just happened change.
+
+"project-broadcaster" requires the following environmental variables:
+
+- NATS_URL = `nats://my-nats:4222`
+- TELEGRAM_ACCESS_TOKEN = looks something like `123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11`
+- TELEGRAM_CHAT_ID= looks something like `-987654321`
+
+Both token and chat id must be acquired using the [Telegram API](https://core.telegram.org/bots/api).
+
+The broadcaster can be scaled horizontally without Telegram messages getting sent by multiple subscribers/replicas at the same time. This is achieved by using NATS queue groups. My replicas join the queue "todos_broadcasters".
+
+> As messages on the registered subject are published, one member of the group is chosen randomly to receive the message. Although queue groups have multiple subscribers, each message is consumed by only one.
+
+Source: <https://docs.nats.io/nats-concepts/queue>
+
+Here is an example how it behaves during runtime:
+
+![Screencast of broadcaster runtime](screenshots/nats-todos-broadcaster-screencast.gif)
+
+Whats going on here?
+
+The deployment is installed in the left pane of the terminal. In the right pane [nats-cli](https://www.npmjs.com/package/nats-cli) is listening. It prints all messages unfiltered.
+
+This works because `kubectl -n project port-forward my-nats-0 4222` was executed in the second tab which is not visible. 
 

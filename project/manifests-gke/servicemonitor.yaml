@@ -1,0 +1,23 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: monitoring-nats
+  namespace: prometheus
+  labels:
+    release: prometheus-operator-1598721391
+    # We need a label so that Prometheus knows to listen to this
+spec:
+  selector:
+    matchLabels:
+      app: my-nats
+  endpoints:
+    - interval: 10s
+      path: /metrics
+      port: metrics
+  namespaceSelector:
+    matchNames:
+      - project
+# $ json='[{"genre":"deep house"}, {"genre": "progressive house"}, {"genre": "dubstep"}]'
+# $ echo "$json" | jq -c '.[] | select(.genre | contains("house"))'
+# {"genre":"deep house"}
+# {"genre":"progressive house"}

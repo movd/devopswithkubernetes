@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: project-broadcaster-dep
+  namespace: project
+spec:
+  replicas: 6
+  selector:
+    matchLabels:
+      app: project-broadcaster-dep
+  template:
+    metadata:
+      labels:
+        app: project-broadcaster-dep
+    spec:
+      containers:
+        - name: project-broadcaster-dep
+          image: docker.io/movd/devopswithkubernetes-project-broadcaster:sha-c4e4e00
+          envFrom:
+            - secretRef:
+                name: telegram-secret
+          resources:
+            limits:
+              memory: '128Mi'
+              cpu: '100m'

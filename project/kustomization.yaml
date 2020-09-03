@@ -6,9 +6,10 @@ resources:
   - manifests-gke/secret.yaml
   - manifests-gke/statefulset.yaml
   - manifests-gke/service.yaml
+  - manifests-gke/configmap.yaml
   - manifests-gke/deployment.yaml
 images:
   - name: PROJECT_BACKEND_IMAGE
-    newName: movd/devopswithkubernetes-project-backend:v1.7.0
+    newName: movd/devopswithkubernetes-project-backend:v2.0.0
   - name: PROJECT_FRONTEND_IMAGE
     newName: movd/devopswithkubernetes-project-frontend:v1.4.0

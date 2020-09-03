@@ -32,6 +32,8 @@ spec:
           envFrom:
             - secretRef:
                 name: postgres-pw-url
+            - configMapRef:
+                name: nats-config
           readinessProbe:
             initialDelaySeconds: 5
             timeoutSeconds: 5
