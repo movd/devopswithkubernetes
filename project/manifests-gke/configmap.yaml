@@ -4,3 +4,4 @@ data:
 kind: ConfigMap
 metadata:
   name: nats-config
+  namespace: project
