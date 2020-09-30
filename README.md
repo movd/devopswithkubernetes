@@ -2,6 +2,8 @@
 
 This repo contains my solutions for the exercises of <https://devopswithkubernetes.com/>.
 
+Note: I created my solutions during the beta phase of the course.
+
 - [Solving the DevOps with Kubernetes MOOC](#solving-the-devops-with-kubernetes-mooc)
   - [Solutions for Part 1](#solutions-for-part-1)
   - [Solutions for Part 2](#solutions-for-part-2)
@@ -29,6 +31,7 @@ This repo contains my solutions for the exercises of <https://devopswithkubernet
     - [Exercise 4.06 Add NATS to project](#exercise-406-add-nats-to-project)
       - [NATS for `project-backend`](#nats-for-project-backend)
       - [`project-broadcaster`: NATS to Telegram](#project-broadcaster-nats-to-telegram)
+    - [Exercise 4.07](#exercise-407)
 
 ## Solutions for Part 1
 
@@ -730,7 +733,6 @@ If the `NATS_URL` environment variable is set the backend sends messages to NATS
 The JSON objects stem directly from sequelizeand always contains:  
 `{id:uuidv4, userId: null, task: string, done: boolean, createdAt: timestamp, updatedAt: timestamp}`
 
-
 #### `project-broadcaster`: NATS to Telegram
 
 "project-broadcaster" is subscribing to NATS. It listens to messages that are sent by the backend to either the queue "todos.created", "todos.updated" or "todos.deleted". The JSON payload gets forwarded in a message to a Telegram Chat informing the admin on the just happened change.
@@ -757,5 +759,8 @@ Whats going on here?
 
 The deployment is installed in the left pane of the terminal. In the right pane [nats-cli](https://www.npmjs.com/package/nats-cli) is listening. It prints all messages unfiltered.
 
-This works because `kubectl -n project port-forward my-nats-0 4222` was executed in the second tab which is not visible. 
+This works because `kubectl -n project port-forward my-nats-0 4222` was executed in the second tab which is not visible.
 
+### Exercise 4.07
+
+_While I was working on my solutions, exercises 6 and 7 were one. In the final course, they will get split into two consecutive tasks._
