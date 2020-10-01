@@ -5,12 +5,13 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "node index.js",
+    "dev": "NODE_ENV=development node index.js"
   },
   "author": "Moritz",
   "license": "ISC",
   "dependencies": {
-    "dotenv": "^8.2.0",
+    "@kubernetes/client-node": "^0.12.2",
     "website-scraper": "^4.2.3"
   }
 }
