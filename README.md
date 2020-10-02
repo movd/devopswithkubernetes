@@ -32,6 +32,8 @@ Note: I created my solutions during the beta phase of the course.
       - [NATS for `project-backend`](#nats-for-project-backend)
       - [`project-broadcaster`: NATS to Telegram](#project-broadcaster-nats-to-telegram)
     - [Exercise 4.07](#exercise-407)
+  - [Solutions for Part 5](#solutions-for-part-5)
+    - [Exercise 5.01 DummySite Custom Resource Definition](#exercise-501-dummysite-custom-resource-definition)
 
 ## Solutions for Part 1
 
@@ -764,3 +766,82 @@ This works because `kubectl -n project port-forward my-nats-0 4222` was executed
 ### Exercise 4.07
 
 _While I was working on my solutions, exercises 6 and 7 were one. In the final course, they will get split into two consecutive tasks._
+
+## Solutions for Part 5
+
+### Exercise 5.01 DummySite Custom Resource Definition
+
+Here is the basic run down:
+
+- Custom Resource Definition
+  - My DummySite ressource is defined in `02-ressourcedefinition.yaml`.
+  - properties:
+    - `website_url` (string): url of website that should get dumped
+    - `successful` (boolean): status after execution
+    - `html` (string): full html of website after execution (only viewable with `-o wide` or describe)
+    - `path_in_pod` (string): path to html dump in controller container
+- RBAC
+  - In `03-rbac.yaml` a role is defined that allows the manipulation of only DummySite resources
+- Controller Deployment
+  - The dummysite-controller constantly watches for new DummySite k8s objects using `k8s.Watch` (from [@kubernetes/client-node](https://www.npmjs.com/package/@kubernetes/client-node))
+  - If a new or updated object was found, it extracts the `website_url` property and creates a website dump with [website-scraper](https://www.npmjs.com/package/website-scraper)
+  - The results gets patched back to the DummySite object using `client.patchNamespacedCustomObject` (from `k8s.CustomObjectsApi`)
+  - Output:
+    - via `kubectl get dummysites.stable.dwk`
+    - via a web browser + port-forward to port 8080 (using [halverneus/static-file-server](https://hub.docker.com/r/halverneus/static-file-server/))
+
+My DummySite setup can be run like so:
+
+```sh
+$ kubectl apply -f dummysite/manifests
+namespace/dummysite created
+customresourcedefinition.apiextensions.k8s.io/dummysites.stable.dwk created
+serviceaccount/dummysite-controller-account created
+clusterrole.rbac.authorization.k8s.io/dummysite-controller-role created
+clusterrolebinding.rbac.authorization.k8s.io/dummysite-rolebinding created
+deployment.apps/dummysite-controller-dep created
+dummysite.stable.dwk/example created
+dummysite.stable.dwk/google created
+dummysite.stable.dwk/not-reachable-url created
+dummysite.stable.dwk/empty-spec created
+```
+
+This created four DummySite objects. The controller notices this, scrapes the websites and writes the results back to each object:
+
+```sh
+$ kubectl get dummysites.stable.dwk
+NAME                   WEBSITEURL                          SUCCESSFUL   PATHINPOD
+devopswithkubernetes   https://devopswithkubernetes.com/   true         /usr/src/app/output/devopswithkubernetes.com
+empty-spec                                                 false        N/A
+example                http://example.com                  true         /usr/src/app/output/example.com
+not-reachable-url      http://notreachableurl.foo/         false        N/A
+```
+
+A small webserver also serves the html dumps
+
+```sh
+$ kubectl port-forward $(kubectl get pod -l app=dummysite-controller -o=name) 8080
+Forwarding from 127.0.0.1:8080 -> 8080
+Forwarding from [::1]:8080 -> 8080
+```
+
+![gif of scrape](screenshots/scrape.gif)
+
+Controller log (shortened to the example.com object):
+
+```sh
+kubectl logs $(kubectl get pod -l app=dummysite-controller -o=name) dummysite-controller -f
+
+> dummysite-controller@0.0.1 start /usr/src/app
+> node index.js
+
+☸️ k8s Cluster config: {
+  name: 'inCluster',
+  caFile: '/var/run/secrets/kubernetes.io/serviceaccount/ca.crt',
+  server: 'https://10.96.0.1:443',
+  skipTLSVerify: false
+}
+🎆 DummySite controller launched
+☸️ the k8s object "example" was created or updated
+📸 scraped "http://example.com/" to /usr/src/app/output/example.com
+```

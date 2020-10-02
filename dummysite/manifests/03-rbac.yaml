@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: dummysite-controller-account
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: dummysite-controller-role
+rules:
+  - apiGroups: ["stable.dwk"]
+    resources: ["dummysites"]
+    verbs: ["get", "list", "watch", "create", "delete", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: dummysite-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: dummysite-controller-role
+subjects:
+  - kind: ServiceAccount
+    name: dummysite-controller-account
+    namespace: dummysite

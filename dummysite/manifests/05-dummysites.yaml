@@ -1,0 +1,25 @@
+apiVersion: stable.dwk/v1
+kind: DummySite
+metadata:
+  name: example
+spec:
+  website_url: http://example.com
+---
+apiVersion: stable.dwk/v1
+kind: DummySite
+metadata:
+  name: devopswithkubernetes
+spec:
+  website_url: https://devopswithkubernetes.com/
+---
+apiVersion: stable.dwk/v1
+kind: DummySite
+metadata:
+  name: not-reachable-url
+spec:
+  website_url: http://notreachableurl.foo/
+---
+apiVersion: stable.dwk/v1
+kind: DummySite
+metadata:
+  name: empty-spec

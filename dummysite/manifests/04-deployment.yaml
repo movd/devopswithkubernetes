@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dummysite-controller-dep
+  namespace: dummysite
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dummysite-controller
+  template:
+    metadata:
+      labels:
+        app: dummysite-controller
+    spec:
+      volumes:
+        - name: shared-data
+          emptyDir: {}
+      serviceAccountName: dummysite-controller-account
+      containers:
+        - name: dummysite-controller
+          image: movd/devopswithkubernetes-dummysite-controller:sha-c3d25fa
+          volumeMounts:
+            - name: shared-data
+              mountPath: /usr/src/app/output
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "125m"
+        - name: dummysite-server
+          # Serves the dumped websites at port 8080
+          image: halverneus/static-file-server:v1.8.1
+          volumeMounts:
+            - name: shared-data
+              mountPath: /web
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "125m"
