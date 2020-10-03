@@ -186,7 +186,7 @@ statefulset.apps/postgres-project-stateful created
 </pre>
 </td>
 <td width="30%">
-<code>http://localhost:8081/project</code><br><img src="screenshots/frontend-screenshot.png" alt="Screenshot of frontend">
+<code>http://localhost:8081/project</code><br><img src="images/frontend-screenshot.png" alt="Screenshot of frontend">
 </td>
 </tr> 
 </table>
@@ -212,7 +212,7 @@ Forwarding from [::1]:3000 -> 3000
 Handling connection for 3000
 ```
 
-![Screenshot of Grafana with Loki](screenshots/grafana-loki-screenshot.png)
+![Screenshot of Grafana with Loki](images/grafana-loki-screenshot.png)
 
 ## Solutions for Part 3
 
@@ -416,9 +416,9 @@ gcloud container clusters create dwk-cluster --zone=europe-west3 --enable-stackd
 
 Now I could marvel at both monitoring and logging in the Cloud Console:
 
-![Screenshot of GKE Monitoring](screenshots/monitoring-gke-overview.png)
+![Screenshot of GKE Monitoring](images/monitoring-gke-overview.png)
 
-![Screenshot of Logging in GKE](screenshots/logging-gke-backend.png)
+![Screenshot of Logging in GKE](images/logging-gke-backend.png)
 
 ## Solutions for Part 4
 
@@ -597,7 +597,7 @@ Handling connection for 9090
 
 <http://localhost:9090>
 
-![Screenshot of Prometheus](screenshots/prometheus-kube_pod_info.png)
+![Screenshot of Prometheus](images/prometheus-kube_pod_info.png)
 
 `scalar(sum(kube_pod_info{namespace="prometheus", created_by_kind="StatefulSet"}))`
 
@@ -755,7 +755,7 @@ Source: <https://docs.nats.io/nats-concepts/queue>
 
 Here is an example how it behaves during runtime:
 
-![Screencast of broadcaster runtime](screenshots/nats-todos-broadcaster-screencast.gif)
+![Screencast of broadcaster runtime](images/nats-todos-broadcaster-screencast.gif)
 
 Whats going on here?
 
@@ -825,7 +825,7 @@ Forwarding from 127.0.0.1:8080 -> 8080
 Forwarding from [::1]:8080 -> 8080
 ```
 
-![gif of scrape](screenshots/scrape.gif)
+![gif of scrape](images/scrape.gif)
 
 Controller log (shortened to the example.com object):
 
