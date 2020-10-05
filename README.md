@@ -853,7 +853,7 @@ Here is my marked map of projects and products I have used from the Cloud Native
 
 green = used knowingly / blue = used indirectly
 
-[![marked cloud native landscape](images/marked-cloud-native-landscape-thumb.png)](images/marked-cloud-native-landscape.png)
+[![marked cloud native landscape](images/marked-cloud-native-landscape-thumb.png)](https://raw.githubusercontent.com/movd/devopswithkubernetes/master/images/marked-cloud-native-landscape.jpg)
 
 <small>_Source: <https://landscape.cncf.io/images/landscape.png> (Version 2020-10-03T00:34:55Z ec9c49d4)_</small>
 
