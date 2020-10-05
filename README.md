@@ -34,6 +34,7 @@ Note: I created my solutions during the beta phase of the course.
     - [Exercise 4.07](#exercise-407)
   - [Solutions for Part 5](#solutions-for-part-5)
     - [Exercise 5.01 DummySite Custom Resource Definition](#exercise-501-dummysite-custom-resource-definition)
+    - [Exercise 5.03 Cloud Native Landscape](#exercise-503-cloud-native-landscape)
 
 ## Solutions for Part 1
 
@@ -845,3 +846,203 @@ kubectl logs $(kubectl get pod -l app=dummysite-controller -o=name) dummysite-co
 ☸️ the k8s object "example" was created or updated
 📸 scraped "http://example.com/" to /usr/src/app/output/example.com
 ```
+
+### Exercise 5.03 Cloud Native Landscape
+
+Here is my marked map of projects and products I have used from the Cloud Native landscape. I highlighted both the ones used in the course and outside of the course.
+
+green = used knowingly / blue = used indirectly
+
+[![marked cloud native landscape](images/marked-cloud-native-landscape-thumb.png)](images/marked-cloud-native-landscape.png)
+
+<small>_Source: <https://landscape.cncf.io/images/landscape.png> (Version 2020-10-03T00:34:55Z ec9c49d4)_</small>
+
+<details>
+  <summary>View as Table (click to expand)</summary>
+    <table>
+      <thead>
+        <tr>
+          <th>Product/Project</th>
+          <th>Where</th>
+          <th>Used knowingly or indirectly (dependency)?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Ambassador</td>
+          <td>will use in Ex. 5.02</td>
+          <td>knowingly</td>
+        </tr>
+        <tr>
+          <td>containerd</td>
+          <td>k3d, minikube, GKE</td>
+          <td>dontainerd is used by Docker</td>
+        </tr>
+        <tr>
+          <td>CoreDNS</td>
+          <td>k3d, minikube, GKE</td>
+          <td>indirectly used as DNS in clusters</td>
+        </tr>
+        <tr>
+          <td>etcd</td>
+          <td>GKE, minikube</td>
+          <td>indirectly as a store for all cluster data  </td>
+        </tr>
+        <tr>
+          <td>GitHub Actions</td>
+          <td>whole course</td>
+          <td>knowingly</td>
+        </tr>
+        <tr>
+          <td>Google Cloud</td>
+          <td>whole Part 3 and 4</td>
+          <td>knowingly</td>
+        </tr>
+        <tr>
+          <td>Google Container Registry</td>
+          <td>Ex. 3.03</td>
+          <td>knowingly</td>
+        </tr>
+        <tr>
+          <td>Google Kubernetes Engine</td>
+          <td>Part 3 and 4</td>
+          <td>knowingly</td>
+        </tr>
+        <tr>
+          <td>Google Stackdriver</td>
+          <td>Ex. 3.09</td>
+          <td>knowingly</td>
+        </tr>
+        <tr>
+          <td>Grafana Loki</td>
+          <td>Ex. 2.08</td>
+          <td>knowingly</td>
+        </tr>
+        <tr>
+          <td>Grafana</td>
+          <td>Ex. 2.08, 4.03, 4.06</td>
+          <td>knowingly</td>
+        </tr>
+        <tr>
+          <td>Helm</td>
+          <td>Ex. 2.08, 3.02, 4.03</td>
+          <td>knowingly</td>
+        </tr>
+        <tr>
+          <td>k3s</td>
+          <td>whole course</td>
+          <td>knowingly in k3d clusters</td>
+        </tr>
+        <tr>
+          <td>Kubernetes</td>
+          <td>whole course</td>
+          <td>knowingly</td>
+        </tr>
+        <tr>
+          <td>Linkerd</td>
+          <td>will use in Ex. 5.X</td>
+          <td>knowingly</td>
+        </tr>
+        <tr>
+          <td>NATS</td>
+          <td>Ex. 4.06</td>
+          <td>knowingly</td>
+        </tr>
+        <tr>
+          <td>PostreSQL</td>
+          <td>course project backend</td>
+          <td>knowingly</td>
+        </tr>
+        <tr>
+          <td>Prometheus</td>
+          <td>Ex. 4.03, 4.04</td>
+          <td>indirectly in Part 2 knowingly in Part 4</td>
+        </tr>
+        <tr>
+          <td>Traefik Proxy</td>
+          <td>GKE, k3d and minikube</td>
+          <td>knowingly in GKE and minikube,indirectly in k3d</td>
+        </tr>
+        <tr>
+          <td>Docker</td>
+          <td>whole course</td>
+          <td>knowingly for testing images and indirectly in clusters</td>
+        </tr>
+        <tr>
+          <td>Flannel</td>
+          <td>k3d</td>
+          <td>indirectly as networking for cluster</td>
+        </tr>
+        <tr>
+          <td>NGINX</td>
+          <td>as a default Ingress in minikube and outside the course</td>
+          <td>knowingly</td>
+        </tr>
+        <tr>
+          <td>Cilium</td>
+          <td>outside of course</td>
+          <td>knowingly for k8s NetworkPolicy</td>
+        </tr>
+        <tr>
+          <td>CNI</td>
+          <td>outsisde of course</td>
+          <td>indirectly in minikube to use Cilium</td>
+        </tr>
+        <tr>
+          <td>Docker Compose</td>
+          <td>outside of course</td>
+          <td>knowingly</td>
+        </tr>
+        <tr>
+          <td>Docker Registry</td>
+          <td>outside of course</td>
+          <td>knowingly</td>
+        </tr>
+        <tr>
+          <td>heroku</td>
+          <td>outside of course</td>
+          <td>knowingly</td>
+        </tr>
+        <tr>
+          <td>Icinga</td>
+          <td>outside of course</td>
+          <td>knowingly</td>
+        </tr>
+        <tr>
+          <td>MariadDB</td>
+          <td>outside of course</td>
+          <td>knowingly</td>
+        </tr>
+        <tr>
+          <td>mongoDB</td>
+          <td>outside of course</td>
+          <td>knowingly </td>
+        </tr>
+        <tr>
+          <td>MySQL</td>
+          <td>outside of course</td>
+          <td>knowingly</td>
+        </tr>
+        <tr>
+          <td>podman</td>
+          <td>outside of course</td>
+          <td>knowingly</td>
+        </tr>
+        <tr>
+          <td>portainer</td>
+          <td>outside of course</td>
+          <td>knowingly</td>
+        </tr>
+        <tr>
+          <td>redis</td>
+          <td>outside of course</td>
+          <td>knowingly</td>
+        </tr>
+        <tr>
+          <td>VMware vSphere</td>
+          <td>outside of course</td>
+          <td>knowingly</td>
+        </tr>
+      </tbody>
+    </table>
+</details>
