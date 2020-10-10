@@ -20,41 +20,43 @@ metadata:
   name: postgres-project-stateful
   namespace: project
 spec:
-  serviceName: postgres-project
   selector:
     matchLabels:
       app: postgres-project
+  serviceName: postgres-project
   template:
     metadata:
+      annotations:
+        linkerd.io/inject: enabled
       labels:
         app: postgres-project
     spec:
       containers:
-        - name: db
-          image: postgres:10-alpine
-          env:
-            - name: PGDATA
-              value: /var/lib/postgresql/data/pgdata
-          envFrom:
-            - secretRef:
-                name: postgres-pw-url
-          ports:
-            - name: db
-              containerPort: 5432
-          volumeMounts:
-            # mountpoint to store pg data
-            - name: postgres-project-data
-              mountPath: /var/lib/postgresql/data/
-          resources:
-            limits:
-              memory: "128Mi"
-              # 125/1000 of a core = 12.5%
-              cpu: "125m"
-  volumeClaimTemplates:
-    - metadata:
-        name: postgres-project-data
-      spec:
-        accessModes: ["ReadWriteOnce"]
+      - env:
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        envFrom:
+        - secretRef:
+            name: postgres-pw-url
+        image: postgres:10-alpine
+        name: db
+        ports:
+        - containerPort: 5432
+          name: db
         resources:
-          requests:
-            storage: 1Gi
+          limits:
+            cpu: 125m
+            memory: 128Mi
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data/
+          name: postgres-project-data
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-project-data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
+---

@@ -10,46 +10,49 @@ spec:
       app: project
   template:
     metadata:
+      annotations:
+        linkerd.io/inject: enabled
       labels:
         app: project
     spec:
       containers:
-        - name: project-backend
-          image: movd/devopswithkubernetes-project-backend:v2.0.0
-          envFrom:
-            - secretRef:
-                name: postgres-pw-url
-          readinessProbe:
-            initialDelaySeconds: 90
-            timeoutSeconds: 5
-            periodSeconds: 5
-            failureThreshold: 5
-            successThreshold: 1
-            httpGet:
-              path: /api/healthz?readiness
-              port: 3000
-          livenessProbe:
-            initialDelaySeconds: 80
-            periodSeconds: 60 # every 60 seconds
-            failureThreshold: 10
-            httpGet:
-              path: /api/healthz?liveness
-              port: 3000
-          resources:
-            limits:
-              memory: "128Mi"
-              cpu: "125m"
-        - name: project-frontend
-          image: movd/devopswithkubernetes-project-frontend:v1.4.0
-          readinessProbe:
-            initialDelaySeconds: 10
-            timeoutSeconds: 5
-            periodSeconds: 5
-            successThreshold: 1
-            httpGet:
-              path: /
-              port: 80
-          resources:
-            limits:
-              memory: "128Mi"
-              cpu: "125m"
+      - envFrom:
+        - secretRef:
+            name: postgres-pw-url
+        image: movd/devopswithkubernetes-project-backend:v2.0.0
+        livenessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /api/healthz?liveness
+            port: 3000
+          initialDelaySeconds: 80
+          periodSeconds: 60
+        name: project-backend
+        readinessProbe:
+          failureThreshold: 5
+          httpGet:
+            path: /api/healthz?readiness
+            port: 3000
+          initialDelaySeconds: 90
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: 125m
+            memory: 128Mi
+      - image: movd/devopswithkubernetes-project-frontend:v1.4.0
+        name: project-frontend
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: 125m
+            memory: 128Mi
+---

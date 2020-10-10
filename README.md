@@ -34,7 +34,8 @@ Note: I created my solutions during the beta phase of the course.
     - [Exercise 4.07](#exercise-407)
   - [Solutions for Part 5](#solutions-for-part-5)
     - [Exercise 5.01 DummySite Custom Resource Definition](#exercise-501-dummysite-custom-resource-definition)
-    - [Exercise 5.03 Cloud Native Landscape](#exercise-503-cloud-native-landscape)
+    - [Exercise 5.02 Add Linkerd Service Mesh to `project`](#exercise-502-add-linkerd-service-mesh-to-project)
+    - [Exercise 5.06 Cloud Native Landscape](#exercise-506-cloud-native-landscape)
 
 ## Solutions for Part 1
 
@@ -847,7 +848,36 @@ kubectl logs $(kubectl get pod -l app=dummysite-controller -o=name) dummysite-co
 📸 scraped "http://example.com/" to /usr/src/app/output/example.com
 ```
 
-### Exercise 5.03 Cloud Native Landscape
+### Exercise 5.02 Add Linkerd Service Mesh to `project`
+
+I created a k3d cluster: `k3d create --publish 8081:80 --publish 8082:30080@k3d-k3s-default-worker-0 --workers 2` and installed the service mesh Linkerd as described in the [getting started](https://linkerd.io/2/getting-started/) guide.
+
+Files where injected with `linkerd inject`:
+
+```sh
+$ cd project/manifests-linkerd
+$ echo "$(cat 01-namespace.yaml |linkerd inject -)" > 01-namespace.yaml
+
+namespace "project" injected
+$ echo "$(cat 04-statefulset.yaml |linkerd inject -)" > 04-statefulset.yaml
+
+service "postgres-project-svc" skipped
+statefulset "postgres-project-stateful" injected
+$ echo "$(cat 06-deployment.yaml |linkerd inject -)" > 06-deployment.yaml 
+
+deployment "project-dep" injected
+```
+_I found the nice command to write output from the same file as the input on [serverfault](https://serverfault.com/a/547331)._
+
+After applying the injected yaml files and waiting for the rollout to finish
+
+```sh
+$ linkerd stat deployments -n project
+NAME          MESHED   SUCCESS      RPS   LATENCY_P50   LATENCY_P95   LATENCY_P99   TCP_CONN
+project-dep      3/3   100.00%   1.2rps           1ms           3ms           4ms          6
+```
+
+### Exercise 5.06 Cloud Native Landscape
 
 Here is my marked map of projects and products I have used from the Cloud Native landscape. I highlighted both the ones used in the course and outside of the course.
 
