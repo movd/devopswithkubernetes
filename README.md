@@ -35,6 +35,7 @@ Note: I created my solutions during the beta phase of the course.
   - [Solutions for Part 5](#solutions-for-part-5)
     - [Exercise 5.01 DummySite Custom Resource Definition](#exercise-501-dummysite-custom-resource-definition)
     - [Exercise 5.02 Add Linkerd Service Mesh to `project`](#exercise-502-add-linkerd-service-mesh-to-project)
+    - [Exercise 5.03](#exercise-503)
     - [Exercise 5.06 Cloud Native Landscape](#exercise-506-cloud-native-landscape)
 
 ## Solutions for Part 1
@@ -876,6 +877,12 @@ $ linkerd stat deployments -n project
 NAME          MESHED   SUCCESS      RPS   LATENCY_P50   LATENCY_P95   LATENCY_P99   TCP_CONN
 project-dep      3/3   100.00%   1.2rps           1ms           3ms           4ms          6
 ```
+
+### Exercise 5.03
+
+_recorded with asciinema:_
+
+[![asciicast](https://asciinema.org/a/aNH4nzhpJeWczkhX43hddG3d8.svg)](https://asciinema.org/a/aNH4nzhpJeWczkhX43hddG3d8?speed=5&theme=solarized-dark)
 
 ### Exercise 5.06 Cloud Native Landscape
 
