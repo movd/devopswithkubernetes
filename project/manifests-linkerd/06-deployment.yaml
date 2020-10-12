@@ -15,6 +15,15 @@ spec:
       labels:
         app: project
     spec:
+      initContainers:  
+      - name: check-db-ready
+        image: postgres:10-alpine
+        envFrom:
+        - secretRef:
+            name: postgres-pw-url
+        # check if DB is ready, and only continue when true 
+        # 'pg_isready' uses the default environment variables of postgres
+        command: ['sh', '-c',  'until pg_isready;  do echo waiting for database; sleep 2; done;']
       containers:
       - envFrom:
         - secretRef:
@@ -25,7 +34,7 @@ spec:
           httpGet:
             path: /api/healthz?liveness
             port: 3000
-          initialDelaySeconds: 80
+          initialDelaySeconds: 60
           periodSeconds: 60
         name: project-backend
         readinessProbe:
@@ -33,7 +42,7 @@ spec:
           httpGet:
             path: /api/healthz?readiness
             port: 3000
-          initialDelaySeconds: 90
+          initialDelaySeconds: 10
           periodSeconds: 5
           successThreshold: 1
           timeoutSeconds: 5
