@@ -1,0 +1,21 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: pingpong
+spec:
+  template:
+    metadata:
+      name: pingpong-app
+    spec:
+      containers:
+        - image: movd/devopswithkubernetes-pingpong:sha-4fe4c30 # served from / and /project
+        # - image: movd/devopswithkubernetes-pingpong:sha-2f4eb67 # redirect to /project
+        # - image: movd/devopswithkubernetes-pingpong:sha-746a640 # only on /project
+          env:
+            - name: POSTGRES_HOST
+              value: "postgres-pingpong-svc"
+          envFrom:
+            - secretRef:
+                name: postgres-pw
+
+

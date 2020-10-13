@@ -20,7 +20,7 @@ Note: I created my solutions during the beta phase of the course.
     - [Exercise 3.04: Deleting namespace when branch gets deleted](#exercise-304-deleting-namespace-when-branch-gets-deleted)
     - [Exercise 3.05: DBaaS pro/cons list](#exercise-305-dbaas-procons-list)
     - [Exercise 3.06: Deciding between using PersistentVolumeClaim or Cloud SQL](#exercise-306-deciding-between-using-persistentvolumeclaim-or-cloud-sql)
-    - [Exercise 3.07 and 3.08: Ressource limits](#exercise-307-and-308-ressource-limits)
+    - [Exercise 3.07 and 3.08: Resource limits](#exercise-307-and-308-resource-limits)
     - [Exercise 3.09: Monitoring with GKE](#exercise-309-monitoring-with-gke)
   - [Solutions for Part 4](#solutions-for-part-4)
     - [Exercise 4.01 Readiness Probes for pingpong and main app](#exercise-401-readiness-probes-for-pingpong-and-main-app)
@@ -35,7 +35,9 @@ Note: I created my solutions during the beta phase of the course.
   - [Solutions for Part 5](#solutions-for-part-5)
     - [Exercise 5.01 DummySite Custom Resource Definition](#exercise-501-dummysite-custom-resource-definition)
     - [Exercise 5.02 Add Linkerd Service Mesh to `project`](#exercise-502-add-linkerd-service-mesh-to-project)
-    - [Exercise 5.03](#exercise-503)
+    - [Exercise 5.03 Canary Releases with Linkerd](#exercise-503-canary-releases-with-linkerd)
+    - [Exercise 5.04 TODO](#exercise-504-todo)
+    - [Exercise 5.05 pingpong meets knative](#exercise-505-pingpong-meets-knative)
     - [Exercise 5.06 Cloud Native Landscape](#exercise-506-cloud-native-landscape)
 
 ## Solutions for Part 1
@@ -170,7 +172,7 @@ added a new ping to db
 
 ### Exercise 2.07
 
-The state of the todo application gets stored in a PostgreSQL database. The app hooked up via [Sequelize](https://github.com/sequelize/sequelize). The table get created based on the [Task model](https://github.com/movd/devopswithkubernetes/blob/2229fc1779d08d97d4168b44536a96c599a6882c/project/backend/src/models/task.ts). For deployment the db connection parameter and password are stored and read from `secret.yaml`. This time around I'm not using SealedSecret. Only the backend and the deployment setup where changed.
+The state of the todo application gets stored in a PostgreSQL database. The app is hooked up via [Sequelize](https://github.com/sequelize/sequelize). The table gets created based on the [Task model](https://github.com/movd/devopswithkubernetes/blob/2229fc1779d08d97d4168b44536a96c599a6882c/project/backend/src/models/task.ts). For deployment the db connection parameter and password are stored and read from `secret.yaml`. This time around I'm not using SealedSecret. Only the backend and the deployment setup were changed.
 
 <table>
 <tr>
@@ -380,7 +382,7 @@ Added a new a new Action workflow: [project-delete-branch-namespace.yml](https:/
 
 ### Exercise 3.05: DBaaS pro/cons list
 
-In the following a short pro and contra list which compares Database as a Service vs. self configured and deployed database solutions. I have informed myself about the subject at [DBaaS providers](https://www.snia.org/sites/default/orig/DSI2014/presentations/CloudStor/CashtonColeman_Database_Service_MySQL_Cloud_Final.pdf), in [magazine articles](https://www.cloudcomputing-insider.de/was-ist-database-as-a-service-dbaas-a-692502/) and forums<sup>[1](https://stackoverflow.com/questions/23766951/cloud-sql-vs-self-maintained-database), [2](https://news.ycombinator.com/item?id=19578890)</sup>.
+The following is a short pro and contra list that compares Database as a Service vs. self-configured and deployed database solutions. I have informed myself about the subject at [DBaaS providers](https://www.snia.org/sites/default/orig/DSI2014/presentations/CloudStor/CashtonColeman_Database_Service_MySQL_Cloud_Final.pdf), in [magazine articles](https://www.cloudcomputing-insider.de/was-ist-database-as-a-service-dbaas-a-692502/) and forums<sup>[1](https://stackoverflow.com/questions/23766951/cloud-sql-vs-self-maintained-database), [2](https://news.ycombinator.com/item?id=19578890)</sup>.
 
 **Pros for DBaaS:**
 
@@ -405,9 +407,9 @@ Because I have already used PersistentVolumeClaims I stuck to it. To ensure that
 $ kubectl patch pv pvc-e662f066-fb2d-4efa-98fe-130743e5f77a -p '{"spec":{"persistentVolumeReclaimPolicy":"Retain"}}'
 ```
 
-### Exercise 3.07 and 3.08: Ressource limits
+### Exercise 3.07 and 3.08: Resource limits
 
-As I already ran into ressource limits and quotas while using `k3d` and the [VScode Extension](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools) was constantly nagging me constantly to set `limits` my applications already had ressource tried and tested limits set.
+As I already ran into resource limits and quotas while using `k3d` and the [VScode Extension](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools) was constantly nagging to set `limits` my applications already had resource tried and tested limits set.
 
 ### Exercise 3.09: Monitoring with GKE
 
@@ -612,7 +614,7 @@ returns:
 
 ### Exercise 4.04 Canary release with AnalysisTemplate
 
-My test runs for 10 minutes and checks that the memory consumption does not exceed 652.8 Mb. _Based on my memory ressource limits per container (128*6)*0.85_.
+My test runs for 10 minutes and checks that the memory consumption does not exceed 652.8 Mb. _Based on my memory resource limits per container (128*6)*0.85_.
 
 First I deleted the Deployment, switched to a Rollout and added my [AnalysisTemplate](https://github.com/movd/devopswithkubernetes/blob/master/project/manifests-gke/analysistemplate.yaml).
 
@@ -777,7 +779,7 @@ _While I was working on my solutions, exercises 6 and 7 were one. In the final c
 Here is the basic run down:
 
 - Custom Resource Definition
-  - My DummySite ressource is defined in `02-ressourcedefinition.yaml`.
+  - My DummySite resource is defined in `02-ressourcedefinition.yaml`.
   - properties:
     - `website_url` (string): url of website that should get dumped
     - `successful` (boolean): status after execution
@@ -878,11 +880,55 @@ NAME          MESHED   SUCCESS      RPS   LATENCY_P50   LATENCY_P95   LATENCY_P9
 project-dep      3/3   100.00%   1.2rps           1ms           3ms           4ms          6
 ```
 
-### Exercise 5.03
+### Exercise 5.03 Canary Releases with Linkerd
 
 _recorded with asciinema:_
 
 [![asciicast](https://asciinema.org/a/aNH4nzhpJeWczkhX43hddG3d8.svg)](https://asciinema.org/a/aNH4nzhpJeWczkhX43hddG3d8?speed=5&theme=solarized-dark)
+
+### Exercise 5.04 TODO
+
+placeholder
+
+### Exercise 5.05 pingpong meets knative
+
+I adapted my pingpong app to also serve from `/` not just from `/pingpong` and created a knative service. The database remains a default Kubernetes StatefulSet.
+
+```sh
+$ kubectl apply -f pingpong/manifests-knative/db-statefulset.yaml 
+secret/postgres-pw created
+service/postgres-pingpong-svc created
+configmap/postgres-pingpong-seed created
+statefulset.apps/postgres-pingpong-stateful created
+# Check if database is available
+$ kubectl exec postgres-pingpong-stateful-0 -c db -- psql -U postgres -c 'SELECT * FROM pingpongers;'
+ id | name 
+----+------
+(0 rows)
+$ kubectl apply -f pingpong/manifests-knative/knative-service-pingpong.yaml 
+service.serving.knative.dev/pingpong created
+# Check if knative service gets created
+$ kubectl get ksvc
+NAME            URL                                        LATESTCREATED                  LATESTREADY                    READY   REASON
+helloworld-go   http://helloworld-go.default.example.com   helloworld-go-dwk-message-v1   helloworld-go-dwk-message-v1   True    
+pingpong        http://pingpong.default.example.com        pingpong-app                   pingpong-app                   True    
+# Wait till knative deletes pingpong pod
+$ kubectl get pod
+NAME                           READY   STATUS    RESTARTS   AGE
+postgres-pingpong-stateful-0   1/1     Running   0          6m55s
+# Review how pods get created automatically by knative when pinpong gets pinged
+$ curl -sH "Host: pingpong.default.example.com" http://localhost:8081/
+{"counter":1,"hostname":"pingpong-app-deployment-5859d4c5cc-d2bwg"}
+$ kubectl get pod
+NAME                                       READY   STATUS    RESTARTS   AGE
+postgres-pingpong-stateful-0               1/1     Running   0          10m
+pingpong-app-deployment-5859d4c5cc-d2bwg   1/2     Running   0          3s
+# Check that pings where counted in database
+$ kubectl exec postgres-pingpong-stateful-0 -c db -- psql -U postgres -c 'SELECT COUNT(*) FROM pingpongers;'
+ count 
+-------
+     2
+```
 
 ### Exercise 5.06 Cloud Native Landscape
 
