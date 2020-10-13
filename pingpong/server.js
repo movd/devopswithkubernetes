@@ -47,11 +47,9 @@ const query = async (q) => {
   return res;
 };
 
-app.get("/", (req, res) => {
-  res.redirect("/pingpong");
-});
+const servePingPongFrom = ["/", "/pingpong"];
 
-app.get("/pingpong", async (req, res) => {
+app.get(servePingPongFrom, async (req, res) => {
   try {
     const { rows } = await query(
       "INSERT INTO pingpongers (name) VALUES ('mr. ping async')"
