@@ -36,7 +36,7 @@ Note: I created my solutions during the beta phase of the course.
     - [Exercise 5.01 DummySite Custom Resource Definition](#exercise-501-dummysite-custom-resource-definition)
     - [Exercise 5.02 Add Linkerd Service Mesh to `project`](#exercise-502-add-linkerd-service-mesh-to-project)
     - [Exercise 5.03 Canary Releases with Linkerd](#exercise-503-canary-releases-with-linkerd)
-    - [Exercise 5.04 TODO](#exercise-504-todo)
+    - [Exercise 5.04 Comparison of commercial Kubernetes distributions](#exercise-504-comparison-of-commercial-kubernetes-distributions)
     - [Exercise 5.05 pingpong meets knative](#exercise-505-pingpong-meets-knative)
     - [Exercise 5.06 Cloud Native Landscape](#exercise-506-cloud-native-landscape)
 
@@ -592,7 +592,7 @@ Frontend probe
 
 _This exercise was solved via a GKE cluster._
 
-Installed Prometheus via helm like show in the course notes.
+Installed Prometheus via helm like shown in the course notes.
 
 ```
 $ kubectl port-forward -n prometheus prometheus-prometheus-operator-159793-prometheus-0 9090 &
@@ -737,7 +737,7 @@ If the `NATS_URL` environment variable is set the backend sends messages to NATS
 | PUT /api/todos/uuid    | `todos.updated` | JSON of updated task      |
 | DELETE /api/todos/uuid | `todos.deleted` | JSON of just deleted task |
 
-The JSON objects stem directly from sequelizeand always contains:  
+The JSON objects stem directly from sequelize and always contain:  
 `{id:uuidv4, userId: null, task: string, done: boolean, createdAt: timestamp, updatedAt: timestamp}`
 
 #### `project-broadcaster`: NATS to Telegram
@@ -886,9 +886,23 @@ _recorded with asciinema:_
 
 [![asciicast](https://asciinema.org/a/aNH4nzhpJeWczkhX43hddG3d8.svg)](https://asciinema.org/a/aNH4nzhpJeWczkhX43hddG3d8?speed=5&theme=solarized-dark)
 
-### Exercise 5.04 TODO
+### Exercise 5.04 Comparison of commercial Kubernetes distributions
 
-placeholder
+I decided to compare Google Anthos and VMware Tanzu. I arbitrarily decided VMware Tanzu is the "better" option.
+
+- Both over hybrid solutions, they allow deploying Kubernetes across on-premise, hybrid, and multi-cloud environments.
+- VMware has extensive adoption and is trusted for on-premise hosting in both public institutions and also private companies. Last year VMware decided to make K8s an integral part of their offerings. 
+- The hypervisor ESXi integrates K8s natively on the lowest level of infrastructure, whereas Anthos integrates itself as a VMware Appliance
+- Tanzu provides a service mesh built upon Istio and expands it across multiple clusters and clouds.
+- Tanzu provides its cloud native networking called "NSX" this provides firewalls, load balancing, and namespace isolation on the lowest level.
+- There might be the possibility of cost-saving if a company already has licenses from VMware 
+- A aspect to take into consideration is that Tanzu is a newer solution than Anthos
+
+Sources: 
+
+- ["Steuerjonglage"](https://www.heise.de/select/ix/2020/5/2000615432024327547) (iX, May 2020) German article that compares commercial Kubernetes distributions 
+- ["Will Tanzu, the VMware Kubernetes Play, Succeed?"](https://www.itprotoday.com/hybrid-cloud/will-tanzu-vmware-kubernetes-play-succeed) (ITProTody, May 2020) Blog article on the chances of success of Tanzu
+- ["Top Use Cases for VMware Tanzu Service Mesh, Built on VMware NSX"](https://www.vmware.com/content/dam/digitalmarketing/vmware/en/pdf/products/nsx/vmware-tanzu-usecases.pdf) (VMware, March 2020) white paper for Tanzu
 
 ### Exercise 5.05 pingpong meets knative
 
