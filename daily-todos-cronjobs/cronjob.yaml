@@ -1,0 +1,21 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: daily-todos
+  namespace: default
+  labels:
+    run: curl
+spec:
+  schedule: "0 9 * * *" # every day at 09:00
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: curl
+            image: curlimages/curl:7.73.0
+            args:
+            - sh
+            - -c
+            - "echo -n 'Read: '; curl -sI https://en.wikipedia.org/wiki/Special:Random |grep 'location:' |awk '{print $2}'"
+          restartPolicy: OnFailure

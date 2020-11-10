@@ -12,6 +12,7 @@ Note: I created my solutions during the beta phase of the course.
     - [Exercise 2.06](#exercise-206)
     - [Exercise 2.07](#exercise-207)
     - [Exercise 2.08](#exercise-208)
+    - [Exercise 2.09](#exercise-209)
   - [Solutions for Part 3](#solutions-for-part-3)
     - [Exercise 3.01: deploy main app and ping/pong to GKE](#exercise-301-deploy-main-app-and-pingpong-to-gke)
     - [Exercise 3.02: automatic GKE deployment for project](#exercise-302-automatic-gke-deployment-for-project)
@@ -218,6 +219,43 @@ Handling connection for 3000
 ```
 
 ![Screenshot of Grafana with Loki](images/grafana-loki-screenshot.png)
+
+### Exercise 2.09
+
+_From the final course:_
+
+Created Cronjob with:
+
+```yaml
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: daily-todos
+  namespace: default
+  labels:
+    run: curl
+spec:
+  schedule: "0 9 * * *" # every day at 09:00
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: curl
+              image: curlimages/curl:7.73.0
+              args:
+                - sh
+                - -c
+                - "echo -n 'Read: '; curl -sI https://en.wikipedia.org/wiki/Special:Random |grep 'location:' |awk '{print $2}'"
+          restartPolicy: OnFailure
+```
+
+Get result of last run with:
+
+```sh
+$ kubectl logs $(kubectl get pod -o name |grep daily-todos| tail -1)
+Read: https://en.wikipedia.org/wiki/Dungeons_%26_Dragons:_Wrath_of_the_Dragon_God
+```
 
 ## Solutions for Part 3
 
@@ -866,10 +904,11 @@ $ echo "$(cat 04-statefulset.yaml |linkerd inject -)" > 04-statefulset.yaml
 
 service "postgres-project-svc" skipped
 statefulset "postgres-project-stateful" injected
-$ echo "$(cat 06-deployment.yaml |linkerd inject -)" > 06-deployment.yaml 
+$ echo "$(cat 06-deployment.yaml |linkerd inject -)" > 06-deployment.yaml
 
 deployment "project-dep" injected
 ```
+
 _I found the nice command to write output from the same file as the input on [serverfault](https://serverfault.com/a/547331)._
 
 After applying the injected yaml files and waiting for the rollout to finish
@@ -891,16 +930,16 @@ _recorded with asciinema:_
 I decided to compare Google Anthos and VMware Tanzu. I arbitrarily decided VMware Tanzu is the "better" option.
 
 - Both over hybrid solutions, they allow deploying Kubernetes across on-premise, hybrid, and multi-cloud environments.
-- VMware has extensive adoption and is trusted for on-premise hosting in both public institutions and also private companies. Last year VMware decided to make K8s an integral part of their offerings. 
+- VMware has extensive adoption and is trusted for on-premise hosting in both public institutions and also private companies. Last year VMware decided to make K8s an integral part of their offerings.
 - The hypervisor ESXi integrates K8s natively on the lowest level of infrastructure, whereas Anthos integrates itself as a VMware Appliance
 - Tanzu provides a service mesh built upon Istio and expands it across multiple clusters and clouds.
 - Tanzu provides its cloud native networking called "NSX" this provides firewalls, load balancing, and namespace isolation on the lowest level.
-- There might be the possibility of cost-saving if a company already has licenses from VMware 
+- There might be the possibility of cost-saving if a company already has licenses from VMware
 - A aspect to take into consideration is that Tanzu is a newer solution than Anthos
 
-Sources: 
+Sources:
 
-- ["Steuerjonglage"](https://www.heise.de/select/ix/2020/5/2000615432024327547) (iX, May 2020) German article that compares commercial Kubernetes distributions 
+- ["Steuerjonglage"](https://www.heise.de/select/ix/2020/5/2000615432024327547) (iX, May 2020) German article that compares commercial Kubernetes distributions
 - ["Will Tanzu, the VMware Kubernetes Play, Succeed?"](https://www.itprotoday.com/hybrid-cloud/will-tanzu-vmware-kubernetes-play-succeed) (ITProTody, May 2020) Blog article on the chances of success of Tanzu
 - ["Top Use Cases for VMware Tanzu Service Mesh, Built on VMware NSX"](https://www.vmware.com/content/dam/digitalmarketing/vmware/en/pdf/products/nsx/vmware-tanzu-usecases.pdf) (VMware, March 2020) white paper for Tanzu
 
@@ -909,23 +948,23 @@ Sources:
 I adapted my pingpong app to also serve from `/` not just from `/pingpong` and created a knative service. The database remains a default Kubernetes StatefulSet.
 
 ```sh
-$ kubectl apply -f pingpong/manifests-knative/db-statefulset.yaml 
+$ kubectl apply -f pingpong/manifests-knative/db-statefulset.yaml
 secret/postgres-pw created
 service/postgres-pingpong-svc created
 configmap/postgres-pingpong-seed created
 statefulset.apps/postgres-pingpong-stateful created
 # Check if database is available
 $ kubectl exec postgres-pingpong-stateful-0 -c db -- psql -U postgres -c 'SELECT * FROM pingpongers;'
- id | name 
+ id | name
 ----+------
 (0 rows)
-$ kubectl apply -f pingpong/manifests-knative/knative-service-pingpong.yaml 
+$ kubectl apply -f pingpong/manifests-knative/knative-service-pingpong.yaml
 service.serving.knative.dev/pingpong created
 # Check if knative service gets created
 $ kubectl get ksvc
 NAME            URL                                        LATESTCREATED                  LATESTREADY                    READY   REASON
-helloworld-go   http://helloworld-go.default.example.com   helloworld-go-dwk-message-v1   helloworld-go-dwk-message-v1   True    
-pingpong        http://pingpong.default.example.com        pingpong-app                   pingpong-app                   True    
+helloworld-go   http://helloworld-go.default.example.com   helloworld-go-dwk-message-v1   helloworld-go-dwk-message-v1   True
+pingpong        http://pingpong.default.example.com        pingpong-app                   pingpong-app                   True
 # Wait till knative deletes pingpong pod
 $ kubectl get pod
 NAME                           READY   STATUS    RESTARTS   AGE
@@ -939,7 +978,7 @@ postgres-pingpong-stateful-0               1/1     Running   0          10m
 pingpong-app-deployment-5859d4c5cc-d2bwg   1/2     Running   0          3s
 # Check that pings where counted in database
 $ kubectl exec postgres-pingpong-stateful-0 -c db -- psql -U postgres -c 'SELECT COUNT(*) FROM pingpongers;'
- count 
+ count
 -------
      2
 ```
