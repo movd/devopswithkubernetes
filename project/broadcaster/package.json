@@ -21,7 +21,7 @@
     "typescript": "^3.9.6"
   },
   "dependencies": {
-    "axios": "^0.20.0",
+    "axios": "^0.21.1",
     "cross-env": "^7.0.2",
     "dotenv": "^8.2.0",
     "ts-nats": "^1.2.15"
